@@ -1,6 +1,6 @@
-#include "stdafx.h"
+#include "../../stdafx.h"
+#include "../../settings.h"
 
-#include "settings.h"
 #include "input.h"
 #include "sys_window.h"
 #include "load_image.h"

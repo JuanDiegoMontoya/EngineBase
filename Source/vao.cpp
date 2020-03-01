@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "../../stdafx.h"
 
 #include "vao.h"
 #include "render.h"

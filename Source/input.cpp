@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "../../stdafx.h"
 #include "input.h"
 
 using namespace std;

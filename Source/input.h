@@ -1,5 +1,4 @@
 #pragma once
-#include "stdafx.h"
 
 namespace Input
 {
@@ -22,7 +21,7 @@ namespace Input
 		bool released[GLFW_KEY_LAST];
 	};
 
-	void init_glfw_input_cbs(GLFWwindow* window);
+	void init_glfw_input_cbs(struct GLFWwindow* window);
 	void update();
 	const kb_input& Keyboard();
 	const mouse_input& Mouse();

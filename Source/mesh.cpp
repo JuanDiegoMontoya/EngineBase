@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "../../stdafx.h"
 #include "mesh.h"
 #include "texture.h"
 #include "shader.h"
