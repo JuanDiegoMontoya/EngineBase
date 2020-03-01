@@ -106,7 +106,7 @@ GLFWwindow* init_glfw_context()
 		window = glfwCreateWindow(window_width, window_height, "Graphics Engine", glfwGetPrimaryMonitor(), NULL);
 	else
 	{
-		window = glfwCreateWindow(window_width, window_height - 63, "Graphics Engine", NULL, NULL);
+		window = glfwCreateWindow(window_width, window_height - 63, "Engine", NULL, NULL);
 		Settings::Graphics.screenY = window_height;
 	}
 	if (window == NULL)
