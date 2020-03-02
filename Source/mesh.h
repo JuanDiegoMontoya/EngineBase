@@ -3,7 +3,7 @@
 #include "vao.h"
 #include "ibo.h"
 #include "vbo.h"
-#include "pipeline.h"
+//#include "Pipeline.h"
 
 struct Vertex
 {

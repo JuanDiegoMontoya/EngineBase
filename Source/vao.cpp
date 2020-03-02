@@ -1,7 +1,7 @@
 #include "../../stdafx.h"
 
 #include "vao.h"
-#include "render.h"
+//#include "Renderer.h"
 
 VAO::VAO()
 {

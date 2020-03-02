@@ -13,21 +13,12 @@ static void error_cb(int error, char const* description)
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-	// make sure the viewport matches the new window dimensions; note that width and 
-	// height will be significantly larger than specified on retina displays.
 	glViewport(0, 0, width, height);
-	//window = window_;
-	//Editor::Get().setInit(true);
-
-	//Render::Dimension(Settings::Get().Graphics.ScreenX(),
-	//	Settings::Get().Graphics.ScreenY() -
-	//	(Settings::Get().Graphics.fullscreen ? 0 : 63));
 }
 
+// window was minimized
 static void iconify_callback(GLFWwindow * window, int mode)
 {
-	//if (mode == GLFW_TRUE)
-	//	Game_::game->currLevel->paused = true;
 }
 
 void cursor_enter_callback(GLFWwindow* window, int entered)
