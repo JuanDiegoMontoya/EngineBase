@@ -2,8 +2,7 @@
 #include "Engine.h"
 #include "input.h"
 #include "imgui_impl.h"
-#include "../../Renderer.h"
-#include "../../Interface.h"
+#include "sys_window.h"
 
 // initialize
 namespace Engine
@@ -15,6 +14,7 @@ namespace Engine
 		float dt = 0;        // time since last frame
 		bool paused = false; // if true, certain update functions will not be called
 		float timescale = 1; // larger timescale = faster simulated updates
+		EngineConfig config;
 
 		// lower numbers execute with greater priority (0 will happen before 1)
 		std::map<int, void(*)(), std::less<int>> RenderCallbacks;
@@ -22,13 +22,18 @@ namespace Engine
 	}
 
 
-	bool Init(GLFWwindow* window_)
+	void Init(EngineConfig cfg)
 	{
-		window = window_;
+		config = cfg;
+		window = init_glfw_context();
 
-		Renderer::Init();
-		Interface::Init();
-		return true;
+		ImGui_Impl::Init(window);
+
+		glfwMakeContextCurrent(window);
+		set_glfw_callbacks(window);
+
+		// 1 = vsync; 0 = fast fps
+		glfwSwapInterval(config.verticalSync);
 	}
 
 
@@ -48,7 +53,8 @@ namespace Engine
 
 	void Cleanup()
 	{
-		// owns nothing, so there isn't anything to clean up
+		ImGui_Impl::Cleanup();
+		glfwTerminate();
 	}
 
 
@@ -58,9 +64,33 @@ namespace Engine
 	}
 
 
-	GLFWwindow*& GetWindow()
+	float GetTimescale()
+	{
+		return timescale;
+	}
+
+
+	float SetTimescale(float sc)
+	{
+		timescale = sc;
+	}
+
+
+	GLFWwindow* GetWindow()
 	{
 		return window;
+	}
+
+
+	void Pause()
+	{
+		paused = true;
+	}
+
+
+	void Unpause()
+	{
+		paused = false;
 	}
 
 

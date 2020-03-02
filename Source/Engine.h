@@ -1,12 +1,19 @@
 #pragma once
 
+struct EngineConfig
+{
+	glm::uvec2 windowDim = { 0, 0 };
+	bool forceWindowDim = false; // false = use native resolution
+	bool verticalSync = true;
+};
+
 namespace Engine
 {
 	/*
 		Initialization functions
 	*/
 	// initialize
-	bool Init(GLFWwindow* window);
+	void Init(EngineConfig);
 
 	// functions to be called no matter in the main loop
 	void PushRenderCallback(void(*fnPtr)(), int priority);
@@ -18,14 +25,13 @@ namespace Engine
 	void Run();
 	void Cleanup();
 
-
 	/*
 		Runtime functions
 	*/
 	float GetDT();
 	float GetTimescale();
 	float SetTimescale(float sc);
-	class GLFWwindow*& GetWindow();
+	class GLFWwindow* GetWindow();
 
 	void Pause();
 	void Unpause();
