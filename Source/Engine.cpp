@@ -1,9 +1,9 @@
-#include "stdafx.h"
+#include "../../stdafx.h"
 #include "Engine.h"
 #include "input.h"
 #include "imgui_impl.h"
-#include "Renderer.h"
-#include "Interface.h"
+#include "../../Renderer.h"
+#include "../../Interface.h"
 
 // initialize
 namespace Engine
