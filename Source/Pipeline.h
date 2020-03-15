@@ -18,6 +18,11 @@ public:
 		return cameras_[index];
 	}
 
+	auto& GetAllCameras()
+	{
+		return cameras_;
+	}
+
 	void RemoveCamera(unsigned index)
 	{
 		cameras_.erase(cameras_.begin() + index);
