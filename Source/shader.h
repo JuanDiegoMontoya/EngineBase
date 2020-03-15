@@ -11,6 +11,7 @@ public:
 	GLuint programID;		// the program's address in GPU memory
 	const int shaderID;	// index into shader array
 	std::string name;		// probably actual index into shader array
+	std::unordered_map<std::string, GLint> Uniforms;
 
 	std::string vsPath;	// vertex shader path
 	std::string tcsPath;// tessellation control shader path
@@ -61,33 +62,33 @@ public:
 	{
 		glProgramUniform1f(programID, Uniforms[name], value);
 	}
-	void set3FloatArray(const char* name, const float* value, int count)
+	void set3FloatArray(const char* name, const std::vector<glm::vec3>& value)
 	{
-		glProgramUniform3fv(programID, Uniforms[name], count, &value[0]);
+		glProgramUniform3fv(programID, Uniforms[name], value.size(), &value[0].x);
 	}
-	void set4FloatArray(const char* name, const float* value, int count)
+	void set4FloatArray(const char* name, const std::vector<glm::vec4>& value)
 	{
-		glProgramUniform4fv(programID, Uniforms[name], count, &value[0]);
+		glProgramUniform4fv(programID, Uniforms[name], value.size(), &value[0].x);
 	}
 	void setIntArray(const char* name, const std::vector<int>& value)
 	{
 		glProgramUniform1iv(programID, Uniforms[name], value.size(), &value[0]);
 	}
-	void set1FloatArray(const char* name, const std::vector<float>& value, int count)
+	void set1FloatArray(const char* name, const std::vector<float>& value)
 	{
-		glProgramUniform1fv(programID, Uniforms[name], count, &value[0]);
+		glProgramUniform1fv(programID, Uniforms[name], value.size(), &value[0]);
 	}
-	void set2FloatArray(const char* name, const std::vector<glm::vec2>& value, int count)
+	void set2FloatArray(const char* name, const std::vector<glm::vec2>& value)
 	{
-		glProgramUniform2fv(programID, Uniforms[name], count, &value[0].x);
+		glProgramUniform2fv(programID, Uniforms[name], value.size(), &value[0].x);
 	}
-	void set3FloatArray(const char* name, const std::vector<glm::vec3>& value, int count)
+	void set3FloatArray(const char* name, const std::vector<glm::vec3>& value)
 	{
-		glProgramUniform3fv(programID, Uniforms[name], count, &value[0].x);
+		glProgramUniform3fv(programID, Uniforms[name], value.size(), &value[0].x);
 	}
-	void set4FloatArray(const char* name, const std::vector<glm::vec4>& value, int count)
+	void set4FloatArray(const char* name, const std::vector<glm::vec4>& value)
 	{
-		glProgramUniform4fv(programID, Uniforms[name], count, &value[0].x);
+		glProgramUniform4fv(programID, Uniforms[name], value.size(), &value[0].x);
 	}
 	void setVec2(const char* name, const glm::vec2 &value)
 	{
@@ -139,6 +140,4 @@ private:
 	static constexpr const char* shader_dir_ = "./resources/Shaders/";
 	std::string loadShader(const char* path);
 	GLint compileShader(shadertype type, const GLchar* src);
-
-	std::unordered_map<std::string, GLint> Uniforms;
 }Shader, *ShaderPtr;
