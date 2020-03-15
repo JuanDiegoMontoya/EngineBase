@@ -62,18 +62,6 @@ public:
 	{
 		glProgramUniform1f(programID, Uniforms[name], value);
 	}
-	void set3FloatArray(const char* name, const std::vector<glm::vec3>& value)
-	{
-		glProgramUniform3fv(programID, Uniforms[name], value.size(), &value[0].x);
-	}
-	void set4FloatArray(const char* name, const std::vector<glm::vec4>& value)
-	{
-		glProgramUniform4fv(programID, Uniforms[name], value.size(), &value[0].x);
-	}
-	void setIntArray(const char* name, const std::vector<int>& value)
-	{
-		glProgramUniform1iv(programID, Uniforms[name], value.size(), &value[0]);
-	}
 	void set1FloatArray(const char* name, const std::vector<float>& value)
 	{
 		glProgramUniform1fv(programID, Uniforms[name], value.size(), &value[0]);
@@ -89,6 +77,10 @@ public:
 	void set4FloatArray(const char* name, const std::vector<glm::vec4>& value)
 	{
 		glProgramUniform4fv(programID, Uniforms[name], value.size(), &value[0].x);
+	}
+	void setIntArray(const char* name, const std::vector<int>& value)
+	{
+		glProgramUniform1iv(programID, Uniforms[name], value.size(), &value[0]);
 	}
 	void setVec2(const char* name, const glm::vec2 &value)
 	{

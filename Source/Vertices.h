@@ -272,57 +272,6 @@ namespace Vertices
 		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f  // bottom-left        
 	};
 
-	static const float cube[] =
-	{
-		// Back face (-Z)
-		-0.5f, -0.5f, -0.5f, // Bottom-left
-		 0.5f,  0.5f, -0.5f, // top-right
-		 0.5f, -0.5f, -0.5f, // bottom-right         
-		 0.5f,  0.5f, -0.5f, // top-right
-		-0.5f, -0.5f, -0.5f, // bottom-left
-		-0.5f,  0.5f, -0.5f, // top-left
-
-		// Front face (+Z)
-		-0.5f, -0.5f,  0.5f, // bottom-left
-		 0.5f, -0.5f,  0.5f, // bottom-right
-		 0.5f,  0.5f,  0.5f, // top-right
-		 0.5f,  0.5f,  0.5f, // top-right
-		-0.5f,  0.5f,  0.5f, // top-left
-		-0.5f, -0.5f,  0.5f, // bottom-left
-
-		// Left face (-X)
-		-0.5f,  0.5f,  0.5f, // top-right
-		-0.5f,  0.5f, -0.5f, // top-left
-		-0.5f, -0.5f, -0.5f, // bottom-left
-		-0.5f, -0.5f, -0.5f, // bottom-left
-		-0.5f, -0.5f,  0.5f, // bottom-right
-		-0.5f,  0.5f,  0.5f, // top-right
-
-		// Right face (+X)
-		 0.5f,  0.5f,  0.5f, // top-left
-		 0.5f, -0.5f, -0.5f, // bottom-right
-		 0.5f,  0.5f, -0.5f, // top-right         
-		 0.5f, -0.5f, -0.5f, // bottom-right
-		 0.5f,  0.5f,  0.5f, // top-left
-		 0.5f, -0.5f,  0.5f, // bottom-left     
-
-		// Bottom face (-Y)
-		-0.5f, -0.5f, -0.5f, // top-right
-		 0.5f, -0.5f, -0.5f, // top-left
-		 0.5f, -0.5f,  0.5f, // bottom-left
-		 0.5f, -0.5f,  0.5f, // bottom-left
-		-0.5f, -0.5f,  0.5f, // bottom-right
-		-0.5f, -0.5f, -0.5f, // top-right
-
-		// Top face (+Y)
-		-0.5f,  0.5f, -0.5f, // top-left
-		 0.5f,  0.5f,  0.5f, // bottom-right
-		 0.5f,  0.5f, -0.5f, // top-right     
-		 0.5f,  0.5f,  0.5f, // bottom-right
-		-0.5f,  0.5f, -0.5f, // top-left
-		-0.5f,  0.5f,  0.5f  // bottom-left    
-	};
-
 	// positions
 	static const float pyramid_square[] =
 	{
@@ -400,26 +349,5 @@ namespace Vertices
 		-.5f,-.5f, .5f, // lbf
 		 .5f,-.5f,-.5f, // rbn
 		 .5f,-.5f, .5f, // rbf
-	};
-
-	// f n l r t b
-	static const GLubyte cube_indices_light_ccw[] =
-	{
-		0, 2, 1, 2, 3, 1, // f
-		0, 1, 2, 1, 3, 2, // n
-		0, 2, 1, 1, 2, 3, // l
-		0, 1, 2, 1, 3, 2, // r
-		0, 2, 1, 2, 3, 1, // t
-		0, 1, 2, 1, 3, 2  // b
-	};
-
-	static const GLubyte cube_indices_light_cw[] =
-	{
-		1, 2, 0, 1, 3, 2, // f
-		2, 1, 0, 2, 3, 1, // n
-		1, 2, 0, 3, 2, 1, // l
-		2, 1, 0, 2, 3, 1, // r
-		1, 2, 0, 1, 3, 2, // t
-		2, 1, 0, 2, 3, 1  // b
 	};
 }
