@@ -19,11 +19,6 @@ public:
 	std::string fsPath;	// fragment shader path
 	std::string csPath;	// compute shader path
 
-	// maps strings to GPU memory addresses (as GLints)
-	//std::unordered_map<const char*, GLint, Utils::djb2hash, Utils::charPtrKeyEq> Uniforms;
-	std::unordered_map<std::string, GLint> Uniforms;
-	//std::map<const char*, GLint> Uniforms;
-
 	// standard vertex + fragment program constructor
 	Shader(const char* vertexPath, const char* fragmentPath,
 		const char* tessCtrlPath = "<null>",
@@ -31,106 +26,103 @@ public:
 		const char* geometryPath = "<null>");
 
 	// default constructor (currently no uses)
-	inline Shader() : shaderID(shader_count_)
+	Shader() : shaderID(shader_count_)
 	{
 		//type = sDefault;
 		programID = NULL;
 		shader_count_++;
 	}
 
-	inline ~Shader()
+	~Shader()
 	{
 		glDeleteProgram(programID);
 	}
 
 	// set the active shader to this one
-	inline void Use() const
+	void Use() const
 	{
 		glUseProgram(programID);
 	}
 
-	inline void Unuse() const
+	void Unuse() const
 	{
 		glUseProgram(0);
 	}
 
-	inline void setBool(const char* name, bool value)
+	void setBool(const char* name, bool value)
 	{
-		glUniform1i(Uniforms[name], (int)value);
+		glProgramUniform1i(programID, Uniforms[name], (int)value);
 	}
-	inline void setInt(const char* name, int value)
+	void setInt(const char* name, int value)
 	{
-		glUniform1i(Uniforms[name], value);
+		glProgramUniform1i(programID, Uniforms[name], value);
 	}
-	inline void setFloat(const char* name, float value)
+	void setFloat(const char* name, float value)
 	{
-		glUniform1f(Uniforms[name], value);
+		glProgramUniform1f(programID, Uniforms[name], value);
 	}
-	inline void set3FloatArray(const char* name, const float* value, int count)
+	void set3FloatArray(const char* name, const float* value, int count)
 	{
-		glUniform3fv(Uniforms[name], count, &value[0]);
+		glProgramUniform3fv(programID, Uniforms[name], count, &value[0]);
 	}
-	inline void set4FloatArray(const char* name, const float* value, int count)
+	void set4FloatArray(const char* name, const float* value, int count)
 	{
-		glUniform4fv(Uniforms[name], count, &value[0]);
+		glProgramUniform4fv(programID, Uniforms[name], count, &value[0]);
 	}
-	inline void setIntArray(const char* name, std::vector<int> value)
+	void setIntArray(const char* name, const std::vector<int>& value)
 	{
-		glUniform1iv(Uniforms[name], value.size(), &value[0]);
+		glProgramUniform1iv(programID, Uniforms[name], value.size(), &value[0]);
 	}
-	inline void set1FloatArray(const char* name, std::vector<float>& value, int count)
+	void set1FloatArray(const char* name, const std::vector<float>& value, int count)
 	{
-		glUniform1fv(Uniforms[name], count, &value[0]);
+		glProgramUniform1fv(programID, Uniforms[name], count, &value[0]);
 	}
-	inline void set2FloatArray(const char* name, std::vector<glm::vec2>& value, int count)
+	void set2FloatArray(const char* name, const std::vector<glm::vec2>& value, int count)
 	{
-		glUniform2fv(Uniforms[name], count, &value[0].x);
+		glProgramUniform2fv(programID, Uniforms[name], count, &value[0].x);
 	}
-	inline void set3FloatArray(const char* name, std::vector<glm::vec3>& value, int count)
+	void set3FloatArray(const char* name, const std::vector<glm::vec3>& value, int count)
 	{
-		glUniform3fv(Uniforms[name], count, &value[0].x);
+		glProgramUniform3fv(programID, Uniforms[name], count, &value[0].x);
 	}
-	inline void set4FloatArray(const char* name, std::vector<glm::vec4>& value, int count)
+	void set4FloatArray(const char* name, const std::vector<glm::vec4>& value, int count)
 	{
-		glUniform4fv(Uniforms[name], count, &value[0].x);
+		glProgramUniform4fv(programID, Uniforms[name], count, &value[0].x);
 	}
-	inline void setVec2(const char* name, const glm::vec2 &value)
+	void setVec2(const char* name, const glm::vec2 &value)
 	{
-		glUniform2fv(Uniforms[name], 1, &value[0]);
+		glProgramUniform2fv(programID, Uniforms[name], 1, &value[0]);
 	}
-	inline void setVec2(const char* name, float x, float y)
+	void setVec2(const char* name, float x, float y)
 	{
-		glUniform2f(Uniforms[name], x, y);
+		glProgramUniform2f(programID, Uniforms[name], x, y);
 	}
-	inline void setVec3(const char* name, const glm::vec3 &value)
+	void setVec3(const char* name, const glm::vec3 &value)
 	{
-		glUniform3fv(Uniforms[name], 1, &value[0]);
+		glProgramUniform3fv(programID, Uniforms[name], 1, &value[0]);
 	}
-	inline void setVec3(const char* name, float x, float y, float z)
+	void setVec3(const char* name, float x, float y, float z)
 	{
-		glUniform3f(Uniforms[name], x, y, z);
+		glProgramUniform3f(programID, Uniforms[name], x, y, z);
 	}
-	inline void setVec4(const char* name, const glm::vec4 &value)
+	void setVec4(const char* name, const glm::vec4 &value)
 	{
-		glUniform4fv(Uniforms[name], 1, &value[0]);
+		glProgramUniform4fv(programID, Uniforms[name], 1, &value[0]);
 	}
-	inline void setVec4(const char* name, float x, float y, float z, float w)
+	void setVec4(const char* name, float x, float y, float z, float w)
 	{
-		glUniform4f(Uniforms[name], x, y, z, w);
+		glProgramUniform4f(programID, Uniforms[name], x, y, z, w);
 	}
-	inline void setMat3(const char* name, const glm::mat3 &mat)
+	void setMat3(const char* name, const glm::mat3 &mat)
 	{
-		glUniformMatrix3fv(Uniforms[name], 1, GL_FALSE, &mat[0][0]);
+		glProgramUniformMatrix3fv(programID, Uniforms[name], 1, GL_FALSE, &mat[0][0]);
 	}
-	inline void setMat4(const char* name, const glm::mat4 &mat)
+	void setMat4(const char* name, const glm::mat4 &mat)
 	{
-		PERF_BENCHMARK_START;
-		//glUniformMatrix4fv(Uniforms[name], 1, GL_FALSE, &mat[0][0]);
 		glProgramUniformMatrix4fv(programID, Uniforms[name], 1, GL_FALSE, &mat[0][0]);
-		PERF_BENCHMARK_END;
 	}
 
-	// (static) list of all shader programs
+	// list of all shader programs
 	static std::unordered_map<std::string, Shader*> shaders;
 private:
 	enum shadertype : GLint
@@ -144,7 +136,9 @@ private:
 	};
 
 	static int shader_count_;
-	static const char* shader_dir_;
+	static constexpr const char* shader_dir_ = "./resources/Shaders/";
 	std::string loadShader(const char* path);
 	GLint compileShader(shadertype type, const GLchar* src);
+
+	std::unordered_map<std::string, GLint> Uniforms;
 }Shader, *ShaderPtr;

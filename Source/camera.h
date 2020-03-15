@@ -19,10 +19,10 @@ public:
 	inline const glm::vec3& GetPos() const { return worldpos_; }
 	inline const glm::vec3& GetDir() const { return dir_; }
 	inline const Frustum* GetFrustum() const { return frustum_; }
-	inline const float GetFov() const { return fov_; }
-	inline const float GetNear() const { return near_; }
-	inline const float GetFar() const { return far_; }
-	inline const glm::vec3 GetEuler() const { return { pitch_, yaw_, roll_ }; }
+	inline float GetFov() const { return fov_; }
+	inline float GetNear() const { return near_; }
+	inline float GetFar() const { return far_; }
+	inline glm::vec3 GetEuler() const { return { pitch_, yaw_, roll_ }; }
 
 	inline void SetPos(const glm::vec3& v) { worldpos_ = v; }
 

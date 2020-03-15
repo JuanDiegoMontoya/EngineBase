@@ -3,16 +3,15 @@
 #include <sstream>
 #include <fstream>
 
-// static class variable definitions
 int Shader::shader_count_ = 0;
-const char* Shader::shader_dir_ = "./resources/Shaders/";
 std::unordered_map<std::string, Shader*> Shader::shaders = std::unordered_map<std::string, Shader*>();
 
 // the provided path does not need to include the shader directory
-Shader::Shader(const char* vertexPath, const char* fragmentPath,
-							const char* tessCtrlPath,
-							const char* tessEvalPath,
-							const char* geometryPath) 
+Shader::Shader(const char* vertexPath,
+               const char* fragmentPath,
+               const char* tessCtrlPath,
+               const char* tessEvalPath,
+               const char* geometryPath) 
 	: shaderID(shader_count_++)
 {
 	vsPath = vertexPath;
@@ -66,7 +65,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath,
 	}
 	else
 	{
-		//traceMessage("Shader good link");
+		// link successful
 	}
 
 	glDeleteShader(vShader);
@@ -120,13 +119,11 @@ std::string Shader::loadShader(const char* path)
 		std::ifstream ifs(shaderpath);
 		content = std::string((std::istreambuf_iterator<char>(ifs)),
 			(std::istreambuf_iterator<char>()));
-		//traceMessage("\nShader: " + vertexPath + ", " + fragmentPath + " successfully opened for reading");
 	}
 	catch (std::ifstream::failure e)
 	{
 		std::cout << "Error reading shader: " << path << '\n';
 		std::cout << "Message: " << e.what() << std::endl;
-		//traceMessage(std::string(e.what()));
 	}
 	return std::string(content);
 }
@@ -134,39 +131,38 @@ std::string Shader::loadShader(const char* path)
 // compiles a shader source and returns its ID
 GLint Shader::compileShader(shadertype type, const GLchar* src)
 {
-	GLuint shader;
+	GLuint shader = 0;
 	GLchar infoLog[512];
-	std::string* path;
+	std::string path;
 	GLint success;
 	
 	switch (type)
 	{
 	case Shader::TY_VERTEX:
 		shader = glCreateShader(GL_VERTEX_SHADER);
-		path = &vsPath;
+		path = vsPath;
 		break;
 	case Shader::TY_TESS_CONTROL:
 		shader = glCreateShader(GL_TESS_CONTROL_SHADER);
-		path = &tcsPath;
+		path = tcsPath;
 		break;
 	case Shader::TY_TESS_EVAL:
 		shader = glCreateShader(GL_TESS_EVALUATION_SHADER);
-		path = &vsPath;
+		path = vsPath;
 		break;
 	case Shader::TY_GEOMETRY:
 		shader = glCreateShader(GL_GEOMETRY_SHADER);
-		path = &vsPath;
+		path = vsPath;
 		break;
 	case Shader::TY_FRAGMENT:
 		shader = glCreateShader(GL_FRAGMENT_SHADER);
-		path = &fsPath;
+		path = fsPath;
 		break;
 	case Shader::TY_COMPUTE:
 		shader = glCreateShader(GL_COMPUTE_SHADER);
-		path = &csPath;
+		path = csPath;
 		break;
 	default:
-		//traceMessage("Unknown shader type");
 		path = nullptr;
 		break;
 	}
@@ -178,13 +174,12 @@ GLint Shader::compileShader(shadertype type, const GLchar* src)
 	if (!success)
 	{
 		glGetShaderInfoLog(shader, 512, NULL, infoLog);
-		std::cout << "File: " << *path << std::endl;
+		std::cout << "File: " << path << std::endl;
 		std::cout << "Error compiling shader of type " << type << '\n' << infoLog << std::endl;
-		//traceMessage(std::string(infoLog));
 	}
 	else
 	{
-		//traceMessage("Vertex Shader good compile");
+		// compile successful
 	}
 
 	return shader;
