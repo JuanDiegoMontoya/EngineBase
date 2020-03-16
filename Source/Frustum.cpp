@@ -1,5 +1,5 @@
 #include "../../stdafx.h"
-#include "frustum.h"
+#include "Frustum.h"
 
 void Frustum::Transform(const glm::mat4& proj, const glm::mat4& view)
 {
