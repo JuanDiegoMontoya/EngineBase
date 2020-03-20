@@ -63,6 +63,7 @@ GLFWwindow* init_glfw_context()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
 
 	glfwWindowHint(GLFW_CONTEXT_NO_ERROR, GLFW_TRUE);
 	glfwWindowHint(GLFW_CONTEXT_RELEASE_BEHAVIOR, GLFW_RELEASE_BEHAVIOR_FLUSH);
@@ -97,7 +98,7 @@ GLFWwindow* init_glfw_context()
 		window = glfwCreateWindow(window_width, window_height, "Graphics Engine", glfwGetPrimaryMonitor(), NULL);
 	else
 	{
-		window = glfwCreateWindow(window_width, window_height - 63, "Engine", NULL, NULL);
+		window = glfwCreateWindow(window_width, window_height, "Engine", NULL, NULL);
 		Settings::Graphics.screenY = window_height;
 	}
 	if (window == NULL)
