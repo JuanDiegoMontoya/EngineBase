@@ -87,13 +87,13 @@ void Camera::Update(float dt)
 		if (Input::Keyboard().down[GLFW_KEY_LEFT_CONTROL])
 			currSpeed /= 10;
 		if (Input::Keyboard().down[GLFW_KEY_W])
-			worldpos_ += currSpeed * front;
+			worldpos_ += currSpeed * front * dt;
 		if (Input::Keyboard().down[GLFW_KEY_S])
-			worldpos_ -= currSpeed * front;
+			worldpos_ -= currSpeed * front * dt;
 		if (Input::Keyboard().down[GLFW_KEY_A])
-			worldpos_ -= glm::normalize(glm::cross(front, up)) * currSpeed;
+			worldpos_ -= glm::normalize(glm::cross(front, up)) * currSpeed * dt;
 		if (Input::Keyboard().down[GLFW_KEY_D])
-			worldpos_ += glm::normalize(glm::cross(front, up)) * currSpeed;
+			worldpos_ += glm::normalize(glm::cross(front, up)) * currSpeed * dt;
 
 		yaw_ += Input::Mouse().screenOffset.x;
 		pitch_ += Input::Mouse().screenOffset.y;
