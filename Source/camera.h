@@ -50,7 +50,7 @@ private:
 	glm::mat4 proj_;
 	Frustum* frustum_;
 
-	float speed_ = 3.5f * 60.0f;
+	float speed_ = 3.5f;
 
 	float pitch_ = 16;
 	float yaw_ = 255;
