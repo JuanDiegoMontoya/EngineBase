@@ -28,6 +28,9 @@ namespace Utils
 	// seeded variant
 	float get_random_s(unsigned seed, float low, float high);
 
+	// seeded with vector variant (thread-safe)
+	float get_random_svr(glm::vec3 seed, float low, float high);
+
 	// generates a vector with random components in the given range (thread-safe)
 	glm::vec3 get_random_vec3_r(float low, float high);
 
