@@ -46,14 +46,13 @@ public:
 	bool scrollMove = true;
 private:
 	CameraType type_;
-	glm::vec3 worldpos_ = glm::vec3(0, 0, 0);
-	//glm::vec3 worldpos_ = glm::vec3(150, 50, 100);
-	glm::vec3 dir_ = glm::vec3(0, 0, 0);
+	glm::vec3 worldpos_ = glm::vec3(150, 50, 100);
+	glm::vec3 dir_ = glm::vec3(-.22f, .22f, -.95f);
 	glm::mat4 view_ = glm::mat4(1);
 	glm::mat4 proj_;
 	Frustum* frustum_;
 
-	float speed_ = 3.5f;
+	float speed_ = 3.5f * 60.0f;
 
 	float pitch_ = 16;
 	float yaw_ = 255;
