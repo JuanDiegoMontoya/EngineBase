@@ -41,27 +41,6 @@ namespace Vertices
 		 .5f,-.5f, .5f, // rbf
 	};
 
-	// f n l r t b
-	static const GLubyte cube_indices_light_ccw[] =
-	{
-		0, 2, 1, 2, 3, 1, // f
-		0, 1, 2, 1, 3, 2, // n
-		0, 2, 1, 1, 2, 3, // l
-		0, 1, 2, 1, 3, 2, // r
-		0, 2, 1, 2, 3, 1, // t
-		0, 1, 2, 1, 3, 2  // b
-	};
-
-	static const GLubyte cube_indices_light_cw[] =
-	{
-		1, 2, 0, 1, 3, 2, // f
-		2, 1, 0, 2, 3, 1, // n
-		1, 2, 0, 3, 2, 1, // l
-		2, 1, 0, 2, 3, 1, // r
-		1, 2, 0, 1, 3, 2, // t
-		2, 1, 0, 2, 3, 1  // b
-	};
-
 	static const float cube[] =
 	{
 		// Back face (-Z)
@@ -312,41 +291,84 @@ namespace Vertices
 	};
 
 	// f n l r t b
+	static const GLubyte cube_indices_light_ccw[] =
+	{
+		0, 2, 1, 2, 3, 1, // f
+		0, 1, 2, 1, 3, 2, // n
+		0, 2, 1, 1, 2, 3, // l
+		0, 1, 2, 1, 3, 2, // r
+		0, 2, 1, 2, 3, 1, // t
+		0, 1, 2, 1, 3, 2  // b
+	};
+
+	static const GLubyte cube_indices_light_cw[] =
+	{
+		//1, 2, 0, 1, 3, 2, // f
+		//2, 1, 0, 2, 3, 1, // n
+		//1, 2, 0, 3, 2, 1, // l
+		//2, 1, 0, 2, 3, 1, // r
+		//0, 1, 3, 3, 1, 2, // t
+		//2, 1, 0, 2, 3, 1  // b
+		0, 1, 3, 3, 1, 2, // t
+		0, 1, 3, 3, 1, 2, // t
+		0, 1, 3, 3, 1, 2, // t
+		0, 1, 3, 3, 1, 2, // t
+		0, 1, 3, 3, 1, 2, // t
+		0, 1, 3, 3, 1, 2, // t
+	};
+
+	static const GLubyte cube_indices_light_cw_anisotropic[] =
+	{
+		//0, 1, 3, 3, 2, 0, // f
+		//0, 3, 1, 0, 2, 3, // n
+		//0, 1, 3, 3, 2, 0, // l
+		//0, 3, 1, 0, 2, 3, // r
+		//0, 1, 2, 2, 3, 0, // t
+		//1, 0, 3, 3, 0, 2  // b
+		0, 1, 2, 2, 3, 0, // t
+		0, 1, 2, 2, 3, 0, // t
+		0, 1, 2, 2, 3, 0, // t
+		0, 1, 2, 2, 3, 0, // t
+		0, 1, 2, 2, 3, 0, // t
+		0, 1, 2, 2, 3, 0, // t
+	};
+
+	// f n l r t b
 	static const GLfloat cube_light[] =
 	{
 		// f
-		-.5f,-.5f,.5f, // lbf
 		 .5f,-.5f,.5f, // rbf
-		-.5f, .5f,.5f, // ltf
 		 .5f, .5f,.5f, // rtf
+		-.5f, .5f,.5f, // ltf
+		-.5f,-.5f,.5f, // lbf
 
 		// n
 		-.5f,-.5f,-.5f, // lbn
-		 .5f,-.5f,-.5f, // rbn
 		-.5f, .5f,-.5f, // ltn
 		 .5f, .5f,-.5f, // rtn
+		 .5f,-.5f,-.5f, // rbn
 
 		// l
-		-.5f,-.5f,-.5f, // lbn
 		-.5f,-.5f, .5f, // lbf
-		-.5f, .5f,-.5f, // ltn
 		-.5f, .5f, .5f, // ltf
+		-.5f, .5f,-.5f, // ltn
+		-.5f,-.5f,-.5f, // lbn
 
 		// r
 		 .5f,-.5f,-.5f, // rbn
-		 .5f,-.5f, .5f, // rbf
 		 .5f, .5f,-.5f, // rtn
 		 .5f, .5f, .5f, // rtf
+		 .5f,-.5f, .5f, // rbf
 
 		// t
 		-.5f, .5f,-.5f, // ltn
 		-.5f, .5f, .5f, // ltf
-		 .5f, .5f,-.5f, // rtn
 		 .5f, .5f, .5f, // rtf
+		 .5f, .5f,-.5f, // rtn
 
 		// b
-		-.5f,-.5f,-.5f, // lbn
 		-.5f,-.5f, .5f, // lbf
+		-.5f,-.5f,-.5f, // lbn
 		 .5f,-.5f,-.5f, // rbn
 		 .5f,-.5f, .5f, // rbf
 	};

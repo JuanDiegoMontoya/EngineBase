@@ -42,6 +42,8 @@ public:
 	glm::vec3 acceleration_;
 	float maxspeed_ = 5.0f;
 	glm::vec3 oldPos;
+
+	bool scrollMove = true;
 private:
 	CameraType type_;
 	glm::vec3 worldpos_ = glm::vec3(0, 0, 0);
