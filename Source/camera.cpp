@@ -7,7 +7,7 @@
 Camera::Camera(CameraType type) : type_(type) 
 {
 	frustum_ = new Frustum;
-	GenProjection();
+	GenProjection(fov_);
 	glm::vec3 temp;
 	temp.x = cos(glm::radians(pitch_)) * cos(glm::radians(yaw_));
 	temp.y = sin(glm::radians(pitch_));
