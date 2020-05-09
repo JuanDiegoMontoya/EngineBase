@@ -86,13 +86,18 @@ namespace Utils
 	}
 
 	// seeded with vector
-	float get_random_sv(glm::vec3 seed, float low, float high)
+	float get_random_svr(glm::vec3 seed, float low, float high)
 	{
-		static std::random_device rd;
-		static std::mt19937 rng(rd());
-		rng.seed(ivec3Hash()(seed));
-		std::uniform_real_distribution<float> dist(low, high);
-		return (float)dist(rng);
+		//static thread_local std::random_device rd;
+		//static std::mt19937 rng(rd());
+		//rng.seed(ivec3Hash()(seed));
+		//std::uniform_real_distribution<float> dist(low, high);
+		//return (float)dist(rng);
+
+		static thread_local std::mt19937 generator;
+		generator.seed(ivec3Hash()(seed));
+		std::uniform_real_distribution<float> distribution(low, high);
+		return distribution(generator);
 	}
 
 	glm::vec3 get_random_vec3_r(float low, float high)

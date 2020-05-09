@@ -108,8 +108,8 @@ void Camera::Update(float dt)
 		front = glm::normalize(temp);
 		dir_ = front;
 
-		//if (Input::Mouse().screenOffset.x)
-		worldpos_ += 10 * Input::Mouse().scrollOffset.y * front;
+		if (scrollMove)
+			worldpos_ += 10 * Input::Mouse().scrollOffset.y * front;
 		break;
 	case kAffixedCam: // attached to an object, possibly follows directionality
 		// TODO: add behavior to follow object
@@ -119,6 +119,11 @@ void Camera::Update(float dt)
 		break;
 	}
 
+	UpdateViewMat();
+}
+
+void Camera::UpdateViewMat()
+{
 	view_ = glm::lookAt(worldpos_, worldpos_ + front, up);
 	frustum_->Transform(proj_, view_);
 }

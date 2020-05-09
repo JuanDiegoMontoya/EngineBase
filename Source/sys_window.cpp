@@ -123,7 +123,7 @@ GLFWwindow* init_glfw_context()
 
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-	glViewport(0, 0, window_width, Settings::Graphics.screenY);
+	glViewport(0, 0, window_width, window_height - 63);
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
