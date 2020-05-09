@@ -15,6 +15,7 @@ class Camera
 public:
 	Camera(CameraType type);
 	void Update(float dt);
+	void UpdateViewMat();
 	const glm::mat4& GetView() const { return view_; }
 	const glm::mat4& GetProj() const { return proj_; }
 	const CameraType GetType() const { return type_; }
@@ -26,7 +27,7 @@ public:
 	float GetFar() const { return far_; }
 	glm::vec3 GetEuler() const { return { pitch_, yaw_, roll_ }; }
 
-	void SetPos(const glm::vec3& v) { worldpos_ = v; }
+	void SetPos(const glm::vec3& v) { worldpos_ = v; UpdateViewMat(); }
 	void SetType(CameraType t) { type_ = t; }
 	void SetFar(float f) { far_ = f; GenProjection(); }
 	void GenProjection()

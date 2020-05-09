@@ -119,6 +119,11 @@ void Camera::Update(float dt)
 		break;
 	}
 
+	UpdateViewMat();
+}
+
+void Camera::UpdateViewMat()
+{
 	view_ = glm::lookAt(worldpos_, worldpos_ + front, up);
 	frustum_->Transform(proj_, view_);
 }
