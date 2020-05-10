@@ -1,6 +1,6 @@
 #pragma once
 
-
+// vertex buffer object
 class VBO
 {
 public:

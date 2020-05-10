@@ -31,23 +31,23 @@ void Camera::Update(float dt)
 		velocity_.z *= glm::pow(.90f, dt * 100);
 		if (Input::Keyboard().down[GLFW_KEY_W])
 		{
-			velocity_.x += 60 * cos(glm::radians(yaw_)) * dt;
-			velocity_.z += 60 * sin(glm::radians(yaw_)) * dt;
+			velocity_.x += 60 * cos(glm::radians(yaw_));
+			velocity_.z += 60 * sin(glm::radians(yaw_));
 		}
 		if (Input::Keyboard().down[GLFW_KEY_S])
 		{
-			velocity_.x -= 60 * cos(glm::radians(yaw_)) * dt;
-			velocity_.z -= 60 * sin(glm::radians(yaw_)) * dt;
+			velocity_.x -= 60 * cos(glm::radians(yaw_));
+			velocity_.z -= 60 * sin(glm::radians(yaw_));
 		}
 		if (Input::Keyboard().down[GLFW_KEY_A])
 		{
-			velocity_.x += 60 * cos(glm::radians(yaw_ - 90)) * dt;
-			velocity_.z += 60 * sin(glm::radians(yaw_ - 90)) * dt;
+			velocity_.x += 60 * cos(glm::radians(yaw_ - 90));
+			velocity_.z += 60 * sin(glm::radians(yaw_ - 90));
 		}
 		if (Input::Keyboard().down[GLFW_KEY_D])
 		{
-			velocity_.x -= 60 * cos(glm::radians(yaw_ - 90)) * dt;
-			velocity_.z -= 60 * sin(glm::radians(yaw_ - 90)) * dt;
+			velocity_.x -= 60 * cos(glm::radians(yaw_ - 90));
+			velocity_.z -= 60 * sin(glm::radians(yaw_ - 90));
 		}
 
 		// jump impulse
@@ -87,13 +87,13 @@ void Camera::Update(float dt)
 		if (Input::Keyboard().down[GLFW_KEY_LEFT_CONTROL])
 			currSpeed /= 10;
 		if (Input::Keyboard().down[GLFW_KEY_W])
-			worldpos_ += currSpeed * front * dt;
+			worldpos_ += currSpeed * front;
 		if (Input::Keyboard().down[GLFW_KEY_S])
-			worldpos_ -= currSpeed * front * dt;
+			worldpos_ -= currSpeed * front;
 		if (Input::Keyboard().down[GLFW_KEY_A])
-			worldpos_ -= glm::normalize(glm::cross(front, up)) * currSpeed * dt;
+			worldpos_ -= glm::normalize(glm::cross(front, up)) * currSpeed;
 		if (Input::Keyboard().down[GLFW_KEY_D])
-			worldpos_ += glm::normalize(glm::cross(front, up)) * currSpeed * dt;
+			worldpos_ += glm::normalize(glm::cross(front, up)) * currSpeed;
 
 		yaw_ += Input::Mouse().screenOffset.x;
 		pitch_ += Input::Mouse().screenOffset.y;
