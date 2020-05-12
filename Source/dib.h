@@ -17,7 +17,7 @@ struct DrawArraysIndirectCommand
 {
 	GLuint  count;
 	GLuint  instanceCount;
-	GLuint  firstIndex;
+	GLuint  first;
 	GLuint  baseInstance;
 };
 
