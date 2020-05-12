@@ -72,6 +72,9 @@ GLFWwindow* init_glfw_context()
 	//glfwWindowHint(GLFW_SAMPLES, Settings::Get().Graphics.multisamples);
 	//glEnable(GL_MULTISAMPLE);
 
+	// start window maximized
+	glfwWindowHint(GLFW_MAXIMIZED, GL_TRUE);
+
 	// vertical sync
 	//if (Settings::Get().Graphics.vsync)
 		glfwWindowHint(GLFW_DOUBLEBUFFER, GL_TRUE);

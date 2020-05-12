@@ -22,5 +22,5 @@ public:
 	void Bind() const;
 	void Unbind() const;
 private:
-	GLuint rendererID_;
+	GLuint dibID_;
 };

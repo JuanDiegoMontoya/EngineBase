@@ -3,19 +3,19 @@
 
 DIB::DIB(DrawElementsIndirectCommand* data, GLsizei num, GLenum drawmode)
 {
-	glGenBuffers(1, &rendererID_);
-	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, rendererID_);
+	glGenBuffers(1, &dibID_);
+	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, dibID_);
 	glBufferData(GL_DRAW_INDIRECT_BUFFER, sizeof(DrawElementsIndirectCommand) * num, data, drawmode);
 }
 
 DIB::~DIB()
 {
-	glDeleteBuffers(1, &rendererID_);
+	glDeleteBuffers(1, &dibID_);
 }
 
 void DIB::Bind() const
 {
-	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, rendererID_);
+	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, dibID_);
 }
 
 void DIB::Unbind() const

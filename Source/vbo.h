@@ -10,7 +10,7 @@ public:
 	void Bind() const;
 	void Unbind() const;
 
-	GLuint GetID() { return rendererID_; }
+	GLuint GetID() { return vboID_; }
 private:
-	GLuint rendererID_;
+	GLuint vboID_;
 };
