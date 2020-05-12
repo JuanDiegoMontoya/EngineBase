@@ -13,10 +13,18 @@ struct DrawElementsIndirectCommand
 	// for any other purpose it must be zero
 };
 
+struct DrawArraysIndirectCommand
+{
+	GLuint  count;
+	GLuint  instanceCount;
+	GLuint  firstIndex;
+	GLuint  baseInstance;
+};
+
 class DIB
 {
 public:
-	DIB(DrawElementsIndirectCommand* data, GLsizei count, GLenum drawmode = GL_STATIC_DRAW);
+	DIB(void* data, GLsizei count, GLenum drawmode = GL_STATIC_DRAW);
 	~DIB();
 
 	void Bind() const;
