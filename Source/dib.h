@@ -24,7 +24,7 @@ struct DrawArraysIndirectCommand
 class DIB
 {
 public:
-	DIB(void* data, GLsizei count, GLenum drawmode = GL_STATIC_DRAW);
+	DIB(void* data, GLsizei size, GLenum drawmode = GL_STATIC_DRAW);
 	~DIB();
 
 	void Bind() const;
