@@ -98,8 +98,7 @@ void Camera::Update(float dt)
 		yaw_ += Input::Mouse().screenOffset.x;
 		pitch_ += Input::Mouse().screenOffset.y;
 
-		if (pitch_ > 89.f) pitch_ = 89.f;
-		if (pitch_ < -89.f) pitch_ = -89.f;
+		pitch_ = glm::clamp(pitch_, -89.0f, 89.0f);
 
 		glm::vec3 temp;
 		temp.x = cos(glm::radians(pitch_)) * cos(glm::radians(yaw_));
