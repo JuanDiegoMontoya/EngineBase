@@ -5,7 +5,12 @@ ABO::ABO(GLuint num) : numCounters_(num)
 {
 	glGenBuffers(1, &rendererID_);
 	glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, rendererID_);
-	glBufferData(GL_ATOMIC_COUNTER_BUFFER, numCounters_ * sizeof(GLuint), NULL, GL_DYNAMIC_DRAW);
+	//glBufferData(GL_ATOMIC_COUNTER_BUFFER, numCounters_ * sizeof(GLuint), NULL, GL_STATIC_READ);
+	glBufferStorage(GL_ATOMIC_COUNTER_BUFFER, numCounters_ * sizeof(GLuint), NULL,
+		GL_DYNAMIC_STORAGE_BIT |
+		GL_MAP_READ_BIT |
+		GL_MAP_WRITE_BIT |
+		GL_CLIENT_STORAGE_BIT);
 }
 
 ABO::~ABO()
