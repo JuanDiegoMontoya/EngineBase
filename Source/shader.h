@@ -25,6 +25,7 @@ public:
 		const char* tessCtrlPath = "<null>",
 		const char* tessEvalPath = "<null>",
 		const char* geometryPath = "<null>");
+	Shader(const char* computePath);
 
 	// default constructor (currently no uses)
 	Shader() : shaderID(shader_count_)
@@ -60,6 +61,11 @@ public:
 		ASSERT(Uniforms.find(name) != Uniforms.end());
 		glProgramUniform1i(programID, Uniforms[name], value);
 	}
+	void setUInt(const char* name, int value)
+	{
+		ASSERT(Uniforms.find(name) != Uniforms.end());
+		glProgramUniform1ui(programID, Uniforms[name], value);
+	}
 	void setFloat(const char* name, float value)
 	{
 		ASSERT(Uniforms.find(name) != Uniforms.end());
@@ -69,6 +75,11 @@ public:
 	{
 		ASSERT(Uniforms.find(name) != Uniforms.end());
 		glProgramUniform1fv(programID, Uniforms[name], value.size(), &value[0]);
+	}
+	void set1FloatArray(const char* name, const float* value, GLsizei count)
+	{
+		ASSERT(Uniforms.find(name) != Uniforms.end());
+		glProgramUniform1fv(programID, Uniforms[name], count, value);
 	}
 	void set2FloatArray(const char* name, const std::vector<glm::vec2>& value)
 	{
@@ -148,4 +159,6 @@ private:
 	static constexpr const char* shader_dir_ = "./resources/Shaders/";
 	std::string loadShader(const char* path);
 	GLint compileShader(shadertype type, const GLchar* src);
+	void initUniforms();
+	void checkLinkStatus(std::vector<std::string> files);
 }Shader, *ShaderPtr;

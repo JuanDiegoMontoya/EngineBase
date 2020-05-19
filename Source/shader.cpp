@@ -22,9 +22,6 @@ Shader::Shader(const char* vertexPath,
 	const std::string vertSrc = loadShader(vertexPath).c_str();
 	const std::string fragSrc = loadShader(fragmentPath).c_str();
 
-	GLint success;
-	GLchar infoLog[512];
-
 	// compile individual shaders
 	programID = glCreateProgram();
 	GLint vShader = compileShader(TY_VERTEX, vertSrc.c_str());
@@ -54,19 +51,7 @@ Shader::Shader(const char* vertexPath,
 	glAttachShader(programID, fShader);
 	glLinkProgram(programID);
 
-	// link program
-	glGetProgramiv(programID, GL_LINK_STATUS, &success);
-	if (!success)
-	{
-		glGetProgramInfoLog(programID, 512, NULL, infoLog);
-		std::cout << "Files: " << vertexPath << ", " << fragmentPath << '\n';
-		std::cout << "Failed to link shader program\n" << infoLog << std::endl;
-		//traceMessage(std::string(infoLog));
-	}
-	else
-	{
-		// link successful
-	}
+	checkLinkStatus({ vertexPath, fragmentPath });
 
 	glDeleteShader(vShader);
 	glDeleteShader(fShader);
@@ -77,36 +62,21 @@ Shader::Shader(const char* vertexPath,
 	if (strcmp(geometryPath, "<null>"))
 		glDeleteShader(gShader);
 
-	// init uniform map used in that shader
-	{
-		GLint max_length;
-		GLint num_uniforms;
+	initUniforms();
+}
 
-		glGetProgramiv(programID, GL_ACTIVE_UNIFORM_MAX_LENGTH, &max_length);
-		//GLchar* pname = (GLchar*)alloca(max_length * sizeof(GLchar));
-		GLchar* pname = new GLchar[max_length];
-		glGetProgramiv(programID, GL_ACTIVE_UNIFORMS, &num_uniforms);
+Shader::Shader(const char* computePath) : shaderID(shader_count_++)
+{
+	csPath = computePath;
+	const std::string compSrc = loadShader(computePath).c_str();
+	programID = glCreateProgram();
+	GLint cShader = compileShader(TY_COMPUTE, compSrc.c_str());
+	glAttachShader(programID, cShader);
+	glLinkProgram(programID);
+	checkLinkStatus({ computePath });
+	glDeleteShader(cShader);
 
-		for (GLint i = 0; i < num_uniforms; ++i)
-		{
-			GLsizei written;
-			GLint size;
-			GLenum type;
-
-			glGetActiveUniform(programID, i, max_length, &written, &size, &type, pname);
-			GLchar* pname1 = new GLchar[max_length];
-			std::strcpy(pname1, pname);
-			if (size > 1)
-				pname1[written - 3] = '\0';
-			GLint loc = glGetUniformLocation(programID, pname1);
-			Uniforms.insert(std::pair<GLchar*, GLint>(pname1, loc));
-			//delete pname1;
-		}
-
-		// unfortunately we must have this in the same scope as where it's constructed
-		// alloca prevents the use of delete, but its implementation is compiler dependent
-		delete[] pname;
-	}
+	initUniforms();
 }
 
 // loads a shader source into a string
@@ -183,4 +153,58 @@ GLint Shader::compileShader(shadertype type, const GLchar* src)
 	}
 
 	return shader;
+}
+
+void Shader::initUniforms()
+{
+	// init uniform map used in that shader
+	GLint max_length;
+	GLint num_uniforms;
+
+	glGetProgramiv(programID, GL_ACTIVE_UNIFORM_MAX_LENGTH, &max_length);
+	//GLchar* pname = (GLchar*)alloca(max_length * sizeof(GLchar));
+	GLchar* pname = new GLchar[max_length];
+	glGetProgramiv(programID, GL_ACTIVE_UNIFORMS, &num_uniforms);
+
+	for (GLint i = 0; i < num_uniforms; ++i)
+	{
+		GLsizei written;
+		GLint size;
+		GLenum type;
+
+		glGetActiveUniform(programID, i, max_length, &written, &size, &type, pname);
+		GLchar* pname1 = new GLchar[max_length];
+		std::strcpy(pname1, pname);
+		if (size > 1)
+			pname1[written - 3] = '\0';
+		GLint loc = glGetUniformLocation(programID, pname1);
+		Uniforms.insert(std::pair<GLchar*, GLint>(pname1, loc));
+		//delete pname1;
+	}
+
+	// unfortunately we must have this in the same scope as where it's constructed
+	// alloca prevents the use of delete, but its implementation is compiler dependent
+	delete[] pname;
+}
+
+void Shader::checkLinkStatus(std::vector<std::string> files)
+{
+	// link program
+	GLint success;
+	GLchar infoLog[512];
+	glGetProgramiv(programID, GL_LINK_STATUS, &success);
+	if (!success)
+	{
+		glGetProgramInfoLog(programID, 512, NULL, infoLog);
+		std::cout << "File(s): ";// << vertexPath << ", " << fragmentPath << '\n';
+		for (const auto& file : files)
+			std::cout << file << (file == *(files.end() - 1) ? "" : ", "); // no comma on last element
+		std::cout << '\n';
+		std::cout << "Failed to link shader program\n" << infoLog << std::endl;
+		//traceMessage(std::string(infoLog));
+	}
+	else
+	{
+		// link successful
+	}
 }
