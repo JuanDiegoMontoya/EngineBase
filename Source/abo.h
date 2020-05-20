@@ -18,4 +18,5 @@ public:
 private:
 	GLuint rendererID_;
 	GLuint numCounters_;
+	//GLuint* rbuffer; // persistently mapped
 };
