@@ -5,22 +5,39 @@ ABO::ABO(GLuint num) : numCounters_(num)
 {
 	glGenBuffers(1, &rendererID_);
 	glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, rendererID_);
-	//glBufferData(GL_ATOMIC_COUNTER_BUFFER, numCounters_ * sizeof(GLuint), NULL, GL_STATIC_READ);
-	glBufferStorage(GL_ATOMIC_COUNTER_BUFFER, numCounters_ * sizeof(GLuint), NULL,
+
+#if PERSISTENCE
+	GLbitfield storageFlags =
 		GL_DYNAMIC_STORAGE_BIT |
 		GL_MAP_READ_BIT |
 		GL_MAP_WRITE_BIT |
 		GL_CLIENT_STORAGE_BIT |
 		GL_MAP_PERSISTENT_BIT |
+		GL_MAP_COHERENT_BIT;
+	glBufferStorage(GL_ATOMIC_COUNTER_BUFFER, numCounters_ * sizeof(GLuint), NULL,
+		storageFlags);
+	rbuffer = (GLuint*)glMapBufferRange(
+		GL_ATOMIC_COUNTER_BUFFER,
+		0, num * sizeof(GLuint),
+		GL_MAP_READ_BIT |
+		GL_MAP_WRITE_BIT |
+		GL_MAP_PERSISTENT_BIT |
 		GL_MAP_COHERENT_BIT);
-	//rbuffer = (GLuint*)glMapBufferRange(
-	//	GL_ATOMIC_COUNTER_BUFFER,
-	//	0, num * sizeof(GLuint),
-	//	GL_MAP_READ_BIT);
+#else
+	glBufferStorage(GL_ATOMIC_COUNTER_BUFFER,
+		numCounters_ * sizeof(GLuint), nullptr,
+		GL_DYNAMIC_STORAGE_BIT |
+		GL_MAP_READ_BIT |
+		GL_MAP_WRITE_BIT |
+		GL_CLIENT_STORAGE_BIT);
+#endif
 }
 
 ABO::~ABO()
 {
+#if PERSISTENCE
+	glUnmapBuffer(GL_ATOMIC_COUNTER_BUFFER);
+#endif
 	glDeleteBuffers(1, &rendererID_);
 }
 
@@ -37,8 +54,9 @@ void ABO::Unbind()
 
 void ABO::Reset()
 {
-	//std::memset(rbuffer, 0, numCounters_ * sizeof(GLuint));
-
+#if PERSISTENCE
+	std::memset(rbuffer, 0, numCounters_ * sizeof(GLuint));
+#else
 	glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, rendererID_);
 	GLuint* buffer;
 	buffer = (GLuint*)glMapBufferRange(
@@ -48,36 +66,42 @@ void ABO::Reset()
 		GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
 	std::memset(buffer, 0, numCounters_ * sizeof(GLuint));
 	glUnmapBuffer(GL_ATOMIC_COUNTER_BUFFER);
+#endif
 }
 
 void ABO::Set(GLuint index, GLuint value)
 {
+#if PERSISTENCE
+	rbuffer[index] = value;
+#else
 	glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, rendererID_);
-	// sets a single atomic's value
 	glBufferSubData(
 		GL_ATOMIC_COUNTER_BUFFER,
 		index * sizeof(GLuint),
 		sizeof(GLuint),
 		&value);
+#endif
 }
 
 GLuint ABO::Get(GLuint index)
 {
-	//return rbuffer[index];
+#if PERSISTENCE
+	return rbuffer[index];
+#else
 	glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, rendererID_);
-	// gets a single atomic's value
-	GLuint val;
-	glGetBufferSubData(
-		GL_ATOMIC_COUNTER_BUFFER,
-		index * sizeof(GLuint),
-		sizeof(GLuint),
-		&val);
-	//GLuint* ptr = (GLuint*)glMapBufferRange(
+	//GLuint val;
+	//glGetBufferSubData(
 	//	GL_ATOMIC_COUNTER_BUFFER,
 	//	index * sizeof(GLuint),
 	//	sizeof(GLuint),
-	//	GL_MAP_READ_BIT);
-	//GLuint val = *ptr;
-	//glUnmapBuffer(GL_ATOMIC_COUNTER_BUFFER);
+	//	&val);
+	GLuint* ptr = (GLuint*)glMapBufferRange(
+		GL_ATOMIC_COUNTER_BUFFER,
+		index * sizeof(GLuint),
+		sizeof(GLuint),
+		GL_MAP_READ_BIT);
+	GLuint val = *ptr;
+	glUnmapBuffer(GL_ATOMIC_COUNTER_BUFFER);
 	return val;
+#endif
 }

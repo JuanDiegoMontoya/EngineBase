@@ -1,5 +1,7 @@
 #pragma once
 
+#define PERSISTENCE false
+
 // atomic counter buffer object
 class ABO
 {
@@ -18,5 +20,7 @@ public:
 private:
 	GLuint rendererID_;
 	GLuint numCounters_;
-	//GLuint* rbuffer; // persistently mapped
+#if PERSISTENCE
+	GLuint* rbuffer; // persistently mapped
+#endif
 };
