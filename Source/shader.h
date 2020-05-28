@@ -51,95 +51,95 @@ public:
 		glUseProgram(0);
 	}
 
-	void setBool(const char* name, bool value)
+	void setBool(const char* uniform, bool value)
 	{
-		ASSERT(Uniforms.find(name) != Uniforms.end());
-		glProgramUniform1i(programID, Uniforms[name], (int)value);
+		ASSERT(Uniforms.find(uniform) != Uniforms.end());
+		glProgramUniform1i(programID, Uniforms[uniform], (int)value);
 	}
-	void setInt(const char* name, int value)
+	void setInt(const char* uniform, int value)
 	{
-		ASSERT(Uniforms.find(name) != Uniforms.end());
-		glProgramUniform1i(programID, Uniforms[name], value);
+		ASSERT(Uniforms.find(uniform) != Uniforms.end());
+		glProgramUniform1i(programID, Uniforms[uniform], value);
 	}
-	void setUInt(const char* name, int value)
+	void setUInt(const char* uniform, int value)
 	{
-		ASSERT(Uniforms.find(name) != Uniforms.end());
-		glProgramUniform1ui(programID, Uniforms[name], value);
+		ASSERT(Uniforms.find(uniform) != Uniforms.end());
+		glProgramUniform1ui(programID, Uniforms[uniform], value);
 	}
-	void setFloat(const char* name, float value)
+	void setFloat(const char* uniform, float value)
 	{
-		ASSERT(Uniforms.find(name) != Uniforms.end());
-		glProgramUniform1f(programID, Uniforms[name], value);
+		ASSERT(Uniforms.find(uniform) != Uniforms.end());
+		glProgramUniform1f(programID, Uniforms[uniform], value);
 	}
-	void set1FloatArray(const char* name, const std::vector<float>& value)
+	void set1FloatArray(const char* uniform, const std::vector<float>& value)
 	{
-		ASSERT(Uniforms.find(name) != Uniforms.end());
-		glProgramUniform1fv(programID, Uniforms[name], value.size(), &value[0]);
+		ASSERT(Uniforms.find(uniform) != Uniforms.end());
+		glProgramUniform1fv(programID, Uniforms[uniform], value.size(), &value[0]);
 	}
-	void set1FloatArray(const char* name, const float* value, GLsizei count)
+	void set1FloatArray(const char* uniform, const float* value, GLsizei count)
 	{
-		ASSERT(Uniforms.find(name) != Uniforms.end());
-		glProgramUniform1fv(programID, Uniforms[name], count, value);
+		ASSERT(Uniforms.find(uniform) != Uniforms.end());
+		glProgramUniform1fv(programID, Uniforms[uniform], count, value);
 	}
-	void set2FloatArray(const char* name, const std::vector<glm::vec2>& value)
+	void set2FloatArray(const char* uniform, const std::vector<glm::vec2>& value)
 	{
-		ASSERT(Uniforms.find(name) != Uniforms.end());
-		glProgramUniform2fv(programID, Uniforms[name], value.size(), &value[0].x);
+		ASSERT(Uniforms.find(uniform) != Uniforms.end());
+		glProgramUniform2fv(programID, Uniforms[uniform], value.size(), &value[0].x);
 	}
-	void set3FloatArray(const char* name, const std::vector<glm::vec3>& value)
+	void set3FloatArray(const char* uniform, const std::vector<glm::vec3>& value)
 	{
-		ASSERT(Uniforms.find(name) != Uniforms.end());
-		glProgramUniform3fv(programID, Uniforms[name], value.size(), &value[0].x);
+		ASSERT(Uniforms.find(uniform) != Uniforms.end());
+		glProgramUniform3fv(programID, Uniforms[uniform], value.size(), &value[0].x);
 	}
-	void set4FloatArray(const char* name, const std::vector<glm::vec4>& value)
+	void set4FloatArray(const char* uniform, const std::vector<glm::vec4>& value)
 	{
-		ASSERT(Uniforms.find(name) != Uniforms.end());
-		glProgramUniform4fv(programID, Uniforms[name], value.size(), &value[0].x);
+		ASSERT(Uniforms.find(uniform) != Uniforms.end());
+		glProgramUniform4fv(programID, Uniforms[uniform], value.size(), &value[0].x);
 	}
-	void setIntArray(const char* name, const std::vector<int>& value)
+	void setIntArray(const char* uniform, const std::vector<int>& value)
 	{
-		ASSERT(Uniforms.find(name) != Uniforms.end());
-		glProgramUniform1iv(programID, Uniforms[name], value.size(), &value[0]);
+		ASSERT(Uniforms.find(uniform) != Uniforms.end());
+		glProgramUniform1iv(programID, Uniforms[uniform], value.size(), &value[0]);
 	}
-	void setVec2(const char* name, const glm::vec2 &value)
+	void setVec2(const char* uniform, const glm::vec2 &value)
 	{
-		ASSERT(Uniforms.find(name) != Uniforms.end());
-		glProgramUniform2fv(programID, Uniforms[name], 1, &value[0]);
+		ASSERT(Uniforms.find(uniform) != Uniforms.end());
+		glProgramUniform2fv(programID, Uniforms[uniform], 1, &value[0]);
 	}
-	void setVec2(const char* name, float x, float y)
+	void setVec2(const char* uniform, float x, float y)
 	{
-		ASSERT(Uniforms.find(name) != Uniforms.end());
-		glProgramUniform2f(programID, Uniforms[name], x, y);
+		ASSERT(Uniforms.find(uniform) != Uniforms.end());
+		glProgramUniform2f(programID, Uniforms[uniform], x, y);
 	}
-	void setVec3(const char* name, const glm::vec3 &value)
+	void setVec3(const char* uniform, const glm::vec3 &value)
 	{
-		ASSERT(Uniforms.find(name) != Uniforms.end());
-		glProgramUniform3fv(programID, Uniforms[name], 1, &value[0]);
+		ASSERT(Uniforms.find(uniform) != Uniforms.end());
+		glProgramUniform3fv(programID, Uniforms[uniform], 1, &value[0]);
 	}
-	void setVec3(const char* name, float x, float y, float z)
+	void setVec3(const char* uniform, float x, float y, float z)
 	{
-		ASSERT(Uniforms.find(name) != Uniforms.end());
-		glProgramUniform3f(programID, Uniforms[name], x, y, z);
+		ASSERT(Uniforms.find(uniform) != Uniforms.end());
+		glProgramUniform3f(programID, Uniforms[uniform], x, y, z);
 	}
-	void setVec4(const char* name, const glm::vec4 &value)
+	void setVec4(const char* uniform, const glm::vec4 &value)
 	{
-		ASSERT(Uniforms.find(name) != Uniforms.end());
-		glProgramUniform4fv(programID, Uniforms[name], 1, &value[0]);
+		ASSERT(Uniforms.find(uniform) != Uniforms.end());
+		glProgramUniform4fv(programID, Uniforms[uniform], 1, &value[0]);
 	}
-	void setVec4(const char* name, float x, float y, float z, float w)
+	void setVec4(const char* uniform, float x, float y, float z, float w)
 	{
-		ASSERT(Uniforms.find(name) != Uniforms.end());
-		glProgramUniform4f(programID, Uniforms[name], x, y, z, w);
+		ASSERT(Uniforms.find(uniform) != Uniforms.end());
+		glProgramUniform4f(programID, Uniforms[uniform], x, y, z, w);
 	}
-	void setMat3(const char* name, const glm::mat3 &mat)
+	void setMat3(const char* uniform, const glm::mat3 &mat)
 	{
-		ASSERT(Uniforms.find(name) != Uniforms.end());
-		glProgramUniformMatrix3fv(programID, Uniforms[name], 1, GL_FALSE, &mat[0][0]);
+		ASSERT(Uniforms.find(uniform) != Uniforms.end());
+		glProgramUniformMatrix3fv(programID, Uniforms[uniform], 1, GL_FALSE, &mat[0][0]);
 	}
-	void setMat4(const char* name, const glm::mat4 &mat)
+	void setMat4(const char* uniform, const glm::mat4 &mat)
 	{
-		ASSERT(Uniforms.find(name) != Uniforms.end());
-		glProgramUniformMatrix4fv(programID, Uniforms[name], 1, GL_FALSE, &mat[0][0]);
+		ASSERT(Uniforms.find(uniform) != Uniforms.end());
+		glProgramUniformMatrix4fv(programID, Uniforms[uniform], 1, GL_FALSE, &mat[0][0]);
 	}
 
 	// list of all shader programs

@@ -11,17 +11,17 @@ static void error_cb(int error, char const* description)
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
-static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+static void framebuffer_size_callback([[maybe_unused]] GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
 }
 
 // window was minimized
-static void iconify_callback(GLFWwindow * window, int mode)
+static void iconify_callback([[maybe_unused]] GLFWwindow * window, int mode)
 {
 }
 
-void cursor_enter_callback(GLFWwindow* window, int entered)
+void cursor_enter_callback([[maybe_unused]] GLFWwindow* window, int entered)
 {
 	if (entered)
 	{

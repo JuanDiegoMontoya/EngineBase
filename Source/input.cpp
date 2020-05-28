@@ -18,7 +18,7 @@ namespace Input
 		return keyboard;
 	}
 
-	static void keypress_cb(GLFWwindow* window, int key, int scancode, int action, int mods)
+	static void keypress_cb([[maybe_unused]] GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
 		if (key != GLFW_KEY_UNKNOWN)
 		{
@@ -38,12 +38,12 @@ namespace Input
 				break;
 			}
 		}
-
+		
 		//cout << "Key pressed: " << (key) << " Action: " << (action) << endl;
 	}
 
 	static bool firstMouse = true;
-	static void mouse_pos_cb(GLFWwindow* window, double xpos, double ypos)
+	static void mouse_pos_cb([[maybe_unused]] GLFWwindow* window, double xpos, double ypos)
 	{
 		if (firstMouse)
 		{
@@ -66,7 +66,7 @@ namespace Input
 		//cout << "Mouse pos: " << "(" << xpos << ", " << ypos << ")" << endl;
 	}
 
-	static void mouse_scroll_cb(GLFWwindow* window, double xoffset, double yoffset)
+	static void mouse_scroll_cb([[maybe_unused]] GLFWwindow* window, double xoffset, double yoffset)
 	{
 		mouse.scrollOffset.x = (float)xoffset;
 		mouse.scrollOffset.y = (float)yoffset;
