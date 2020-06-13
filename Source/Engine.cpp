@@ -32,6 +32,11 @@ namespace Engine
 		glfwMakeContextCurrent(window);
 		set_glfw_callbacks(window);
 
+#ifdef TRACY_ENABLE
+		TracyGpuContext;
+#endif
+
+
 		// 1 = vsync; 0 = fast fps
 		glfwSwapInterval(config.verticalSync);
 	}
@@ -125,6 +130,10 @@ namespace Engine
 				fn.second();
 			ImGui_Impl::EndFrame();
 			glfwSwapBuffers(window);
+#ifdef TRACY_ENABLE
+			TracyGpuCollect;
+			FrameMark;
+#endif
 			Input::update();
 		}
 	}
