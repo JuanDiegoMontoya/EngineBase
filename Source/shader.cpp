@@ -155,6 +155,7 @@ GLint Shader::compileShader(shadertype type, const GLchar* src)
 	return shader;
 }
 
+// TODO: https://github.com/fendevel/Guide-to-Modern-OpenGL-Functions#ideal-way-of-retrieving-all-uniform-names
 void Shader::initUniforms()
 {
 	// init uniform map used in that shader
