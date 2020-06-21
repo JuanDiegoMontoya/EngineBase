@@ -28,7 +28,7 @@ namespace Engine
 	/*
 		Runtime functions
 	*/
-	float GetDT();
+	double GetDT();
 	float GetTimescale();
 	float SetTimescale(float sc);
 	class GLFWwindow* GetWindow();

@@ -11,7 +11,7 @@ namespace Engine
 	namespace
 	{
 		GLFWwindow* window = nullptr;
-		float dt = 0;        // time since last frame
+		double dt = 0;        // time since last frame
 		bool paused = false; // if true, certain update functions will not be called
 		float timescale = 1; // larger timescale = faster simulated updates
 		EngineConfig config;
@@ -63,7 +63,7 @@ namespace Engine
 	}
 
 
-	float GetDT()
+	double GetDT()
 	{
 		return dt;
 	}
@@ -109,8 +109,8 @@ namespace Engine
 	{
 		while (!glfwWindowShouldClose(window))
 		{
-			float currFrame = static_cast<float>(glfwGetTime());
-			static float oldFrame = 0;
+			double currFrame = glfwGetTime();
+			static double oldFrame = 0;
 			dt = (currFrame - oldFrame) / timescale;
 			oldFrame = currFrame;
 
