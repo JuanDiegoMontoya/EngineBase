@@ -8,6 +8,10 @@ namespace Debug
 }
 
 #if DE_BUG
+#ifdef TRACY_ENABLE
+#define PERF_BENCHMARK_START ZoneScoped
+#define PERF_BENCHMARK_END ;
+#else
 #define PERF_BENCHMARK_START  high_resolution_clock::time_point benchmark_clock_ = high_resolution_clock::now(); 
 #define PERF_BENCHMARK_END \
 	duration<double> benchmark_duration_ = duration_cast<duration<double>>(high_resolution_clock::now() - benchmark_clock_); \
@@ -15,6 +19,7 @@ namespace Debug
 	benchmark_data_.first = __FUNCTION__; \
 	benchmark_data_.second = benchmark_duration_.count() * 1000; \
 	Debug::systemsPerfInfo[benchmark_data_.first] += benchmark_data_.second;
+#endif // TRACY_ENABLE
 
 #define DEBUG_DO(x) x
 #else
