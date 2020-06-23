@@ -10,6 +10,7 @@ namespace Debug
 
 	void Update(float dt)
 	{
+#ifndef TRACY_ENABLE
 		PERF_BENCHMARK_START;
 
 		//function performance window
@@ -40,5 +41,6 @@ namespace Debug
 
 		systemsPerfInfo.clear();
 		PERF_BENCHMARK_END; //this needs to be last to capture this function's perf
+#endif // TRACY_ENABLE
 	}
 }
