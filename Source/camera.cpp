@@ -19,6 +19,7 @@ Camera::Camera(CameraType type) : type_(type)
 // update movement and generate view matrix
 void Camera::Update(float dt)
 {
+	oldPos = worldpos_;
 	//view_ = glm::translate(glm::mat4(1.0f), worldpos_);
 	float currSpeed = speed_ * dt;
 	switch (type_)
