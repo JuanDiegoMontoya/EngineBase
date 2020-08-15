@@ -6,6 +6,7 @@ struct AABB16;
 struct AABB
 {
 	AABB() = default;
+	AABB(const glm::vec3& min_, const glm::vec3& max_) : min(min_), max(max_) {}
 	AABB(const AABB16& b);
 	glm::vec3 min, max;
 };

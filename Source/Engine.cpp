@@ -75,7 +75,7 @@ namespace Engine
 	}
 
 
-	float SetTimescale(float sc)
+	void SetTimescale(float sc)
 	{
 		timescale = sc;
 	}

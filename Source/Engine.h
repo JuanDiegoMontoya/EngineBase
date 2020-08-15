@@ -30,7 +30,7 @@ namespace Engine
 	*/
 	double GetDT();
 	float GetTimescale();
-	float SetTimescale(float sc);
+	void SetTimescale(float sc);
 	class GLFWwindow* GetWindow();
 
 	void Pause();
