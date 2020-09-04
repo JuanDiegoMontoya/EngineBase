@@ -7,11 +7,11 @@ int Shader::shader_count_ = 0;
 std::unordered_map<std::string, Shader*> Shader::shaders = std::unordered_map<std::string, Shader*>();
 
 // the provided path does not need to include the shader directory
-Shader::Shader(const char* vertexPath,
-               const char* fragmentPath,
-               const char* tessCtrlPath,
-               const char* tessEvalPath,
-               const char* geometryPath) 
+Shader::Shader(std::string vertexPath,
+               std::string fragmentPath,
+               std::string tessCtrlPath,
+               std::string tessEvalPath,
+               std::string geometryPath) 
 	: shaderID(shader_count_++)
 {
 	vsPath = vertexPath;
@@ -19,30 +19,30 @@ Shader::Shader(const char* vertexPath,
 	tcsPath = tessCtrlPath;
 	tesPath = tessEvalPath;
 	gsPath = geometryPath;
-	const std::string vertSrc = loadShader(vertexPath).c_str();
-	const std::string fragSrc = loadShader(fragmentPath).c_str();
+	const std::string vertRawSrc = loadFile(vertexPath);
+	const std::string fragRawSrc = loadFile(fragmentPath);
 
 	// compile individual shaders
 	programID = glCreateProgram();
-	GLint vShader = compileShader(TY_VERTEX, vertSrc.c_str());
-	GLint fShader = compileShader(TY_FRAGMENT, fragSrc.c_str());
+	GLint vShader = compileShader(TY_VERTEX, { vertRawSrc });
+	GLint fShader = compileShader(TY_FRAGMENT, { fragRawSrc });
 	GLint tcShader = 0;
 	GLint teShader = 0;
 	GLint gShader  = 0;
 
-	if (strcmp(tessCtrlPath, "<null>"))
+	if (tessCtrlPath != "<null>")
 	{
-		tcShader = compileShader(TY_TESS_CONTROL, loadShader(tessCtrlPath).c_str());
+		tcShader = compileShader(TY_TESS_CONTROL, loadFile(tessCtrlPath).c_str());
 		glAttachShader(programID, tcShader);
 	}
-	if (strcmp(tessEvalPath, "<null>"))
+	if (tessEvalPath != "<null>")
 	{
-		teShader = compileShader(TY_TESS_EVAL, loadShader(tessEvalPath).c_str());
+		teShader = compileShader(TY_TESS_EVAL, loadFile(tessEvalPath).c_str());
 		glAttachShader(programID, teShader);
 	}
-	if (strcmp(geometryPath, "<null>"))
+	if (geometryPath != "<null>")
 	{
-		gShader = compileShader(TY_GEOMETRY, loadShader(geometryPath).c_str());
+		gShader = compileShader(TY_GEOMETRY, loadFile(geometryPath).c_str());
 		glAttachShader(programID, gShader);
 	}
 
@@ -55,22 +55,23 @@ Shader::Shader(const char* vertexPath,
 
 	glDeleteShader(vShader);
 	glDeleteShader(fShader);
-	if (strcmp(tessCtrlPath, "<null>"))
+	if (tessCtrlPath != "<null>")
 		glDeleteShader(tcShader);
-	if (strcmp(tessEvalPath, "<null>"))
+	if (tessEvalPath != "<null>")
 		glDeleteShader(teShader);
-	if (strcmp(geometryPath, "<null>"))
+	if (geometryPath != "<null>")
 		glDeleteShader(gShader);
 
 	initUniforms();
 }
 
-Shader::Shader(const char* computePath) : shaderID(shader_count_++)
+Shader::Shader(std::string computePath) : shaderID(shader_count_++)
 {
 	csPath = computePath;
-	const std::string compSrc = loadShader(computePath).c_str();
 	programID = glCreateProgram();
-	GLint cShader = compileShader(TY_COMPUTE, compSrc.c_str());
+	const std::string compRawSrc = loadFile(computePath);
+	std::vector<std::string> compSrc = preprocessShaderSource(compRawSrc, computePath);
+	GLint cShader = compileShader(TY_COMPUTE, compSrc);
 	glAttachShader(programID, cShader);
 	glLinkProgram(programID);
 	checkLinkStatus({ computePath });
@@ -79,10 +80,10 @@ Shader::Shader(const char* computePath) : shaderID(shader_count_++)
 	initUniforms();
 }
 
-// loads a shader source into a string
-std::string Shader::loadShader(const char* path)
+// loads a shader source into a string (string_view doesn't support concatenation)
+std::string Shader::loadFile(std::string path)
 {
-	std::string shaderpath = std::string(shader_dir_) + path;
+	std::string shaderpath = shader_dir_ + path;
 	std::string content;
 	try
 	{
@@ -95,11 +96,11 @@ std::string Shader::loadShader(const char* path)
 		std::cout << "Error reading shader: " << path << '\n';
 		std::cout << "Message: " << e.what() << std::endl;
 	}
-	return std::string(content);
+	return content;
 }
 
 // compiles a shader source and returns its ID
-GLint Shader::compileShader(shadertype type, const GLchar* src)
+GLint Shader::compileShader(shadertype type, std::vector<std::string> src)
 {
 	GLuint shader = 0;
 	GLchar infoLog[512];
@@ -133,17 +134,22 @@ GLint Shader::compileShader(shadertype type, const GLchar* src)
 		path = csPath;
 		break;
 	default:
-		path = nullptr;
 		break;
 	}
 
-	glShaderSource(shader, 1, &src, NULL);
+	const GLchar** strings = new GLchar*[src.size()];
+	for (int i = 0; i < src.size(); i++)
+		strings[i] = src[i].data();
+
+	glShaderSource(shader, src.size(), strings, NULL);
 	glCompileShader(shader);
 
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 	if (!success)
 	{
 		glGetShaderInfoLog(shader, 512, NULL, infoLog);
+		// TODO: parse info log to determine files in which errors ocurred
+
 		std::cout << "File: " << path << std::endl;
 		std::cout << "Error compiling shader of type " << type << '\n' << infoLog << std::endl;
 	}
@@ -163,8 +169,7 @@ void Shader::initUniforms()
 	GLint num_uniforms;
 
 	glGetProgramiv(programID, GL_ACTIVE_UNIFORM_MAX_LENGTH, &max_length);
-	//GLchar* pname = (GLchar*)alloca(max_length * sizeof(GLchar));
-	GLchar* pname = new GLchar[max_length];
+	auto pname = std::make_unique<GLchar>(max_length);
 	glGetProgramiv(programID, GL_ACTIVE_UNIFORMS, &num_uniforms);
 
 	for (GLint i = 0; i < num_uniforms; ++i)
@@ -173,22 +178,18 @@ void Shader::initUniforms()
 		GLint size;
 		GLenum type;
 
-		glGetActiveUniform(programID, i, max_length, &written, &size, &type, pname);
-		GLchar* pname1 = new GLchar[max_length];
-		std::strcpy(pname1, pname);
+		glGetActiveUniform(programID, i, max_length, &written, &size, &type, pname.get());
+		auto pname1 = std::make_unique<GLchar>(max_length);
+		std::strcpy(pname1.get(), pname.get());
 		if (size > 1)
-			pname1[written - 3] = '\0';
-		GLint loc = glGetUniformLocation(programID, pname1);
-		Uniforms.insert(std::pair<GLchar*, GLint>(pname1, loc));
+			pname1.get()[written - 3] = '\0';
+		GLint loc = glGetUniformLocation(programID, pname1.get());
+		Uniforms.insert({ pname1.get(), loc });
 		//delete pname1;
 	}
-
-	// unfortunately we must have this in the same scope as where it's constructed
-	// alloca prevents the use of delete, but its implementation is compiler dependent
-	delete[] pname;
 }
 
-void Shader::checkLinkStatus(std::vector<std::string> files)
+void Shader::checkLinkStatus(std::vector<std::string_view> files)
 {
 	// link program
 	GLint success;
@@ -208,4 +209,9 @@ void Shader::checkLinkStatus(std::vector<std::string> files)
 	{
 		// link successful
 	}
+}
+
+std::vector<std::string> Shader::preprocessShaderSource(std::string_view src, std::string_view filename)
+{
+	return { std::string(src) };
 }

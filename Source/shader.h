@@ -21,11 +21,13 @@ public:
 	std::string csPath;	// compute shader path
 
 	// standard vertex + fragment program constructor
-	Shader(const char* vertexPath, const char* fragmentPath,
-		const char* tessCtrlPath = "<null>",
-		const char* tessEvalPath = "<null>",
-		const char* geometryPath = "<null>");
-	Shader(const char* computePath);
+	Shader(
+		std::string vertexPath,
+		std::string fragmentPath,
+		std::string tessCtrlPath = "<null>",
+		std::string tessEvalPath = "<null>",
+		std::string geometryPath = "<null>");
+	Shader(std::string computePath);
 
 	// default constructor (currently no uses)
 	Shader() : shaderID(shader_count_)
@@ -156,9 +158,14 @@ private:
 	};
 
 	static int shader_count_;
+
+	// shader dir includes source and headers alike
 	static constexpr const char* shader_dir_ = "./resources/Shaders/";
-	std::string loadShader(const char* path);
-	GLint compileShader(shadertype type, const GLchar* src);
+	std::string loadFile(std::string path);
+	std::vector<std::string> preprocessShaderSource(
+		std::string_view src,
+		std::string_view filename);
+	GLint compileShader(shadertype type, std::vector<std::string> src);
 	void initUniforms();
-	void checkLinkStatus(std::vector<std::string> files);
+	void checkLinkStatus(std::vector<std::string_view> files);
 }Shader, *ShaderPtr;
