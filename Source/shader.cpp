@@ -44,10 +44,10 @@ Shader::Shader(std::string vertexPath,
                std::string geometryPath) 
 	: shaderID(shader_count_++)
 {
-	//shaderc::Compiler compiler;
-	//shaderc::CompileOptions options;
-	//options.SetSourceLanguage(shaderc_source_language_glsl);
-	//options.SetTargetEnvironment(shaderc_target_env_opengl, 460);
+	shaderc::Compiler compiler;
+	shaderc::CompileOptions options;
+	options.SetSourceLanguage(shaderc_source_language_glsl);
+	options.SetTargetEnvironment(shaderc_target_env_opengl, 460);
 	//shaderc_compile_options_set_include_callbacks
 
 	vsPath = vertexPath;
@@ -63,13 +63,10 @@ Shader::Shader(std::string vertexPath,
 	//auto vres = compiler.PreprocessGlsl(vertRawSrc, shaderc_vertex_shader, vertexPath.c_str(), options);
 	//vres.
 
-	auto [vertSrc, vertMap] = preprocessShaderSource(vertRawSrc, vertexPath);
-	auto [fragSrc, fragMap] = preprocessShaderSource(fragRawSrc, fragmentPath);
-
 	// compile individual shaders
 	programID = glCreateProgram();
-	GLint vShader = compileShader(TY_VERTEX, vertSrc, vertMap);
-	GLint fShader = compileShader(TY_FRAGMENT, fragSrc, fragMap);
+	GLint vShader = compileShader(TY_VERTEX, { vertRawSrc });
+	GLint fShader = compileShader(TY_FRAGMENT, { fragRawSrc });
 	GLint tcShader = 0;
 	GLint teShader = 0;
 	GLint gShader  = 0;
@@ -116,8 +113,7 @@ Shader::Shader(std::string computePath) : shaderID(shader_count_++)
 	csPath = computePath;
 	programID = glCreateProgram();
 	const std::string compRawSrc = loadFile(computePath);
-	auto [compSrc, compMap] = preprocessShaderSource(compRawSrc, computePath);
-	GLint cShader = compileShader(TY_COMPUTE, compSrc, compMap);
+	GLint cShader = compileShader(TY_COMPUTE, { compRawSrc });
 	glAttachShader(programID, cShader);
 	glLinkProgram(programID);
 	checkLinkStatus({ computePath });
@@ -146,9 +142,7 @@ std::string Shader::loadFile(std::string path)
 }
 
 // compiles a shader source and returns its ID
-GLint Shader::compileShader(shadertype type, 
-	const std::vector<std::string>& src, 
-	const std::map<int, std::string>& strIDmap)
+GLint Shader::compileShader(shadertype type, const std::vector<std::string>& src)
 {
 	GLuint shader = 0;
 	GLchar infoLog[512];
@@ -217,7 +211,7 @@ void Shader::initUniforms()
 	GLint num_uniforms;
 
 	glGetProgramiv(programID, GL_ACTIVE_UNIFORM_MAX_LENGTH, &max_length);
-	auto pname = std::make_unique<GLchar>(max_length);
+	GLchar* pname = new GLchar[max_length];
 	glGetProgramiv(programID, GL_ACTIVE_UNIFORMS, &num_uniforms);
 
 	for (GLint i = 0; i < num_uniforms; ++i)
@@ -226,15 +220,17 @@ void Shader::initUniforms()
 		GLint size;
 		GLenum type;
 
-		glGetActiveUniform(programID, i, max_length, &written, &size, &type, pname.get());
+		glGetActiveUniform(programID, i, max_length, &written, &size, &type, pname);
 		GLchar* pname1 = new GLchar[max_length];
-		std::strcpy(pname1, pname.get());
+		std::strcpy(pname1, pname);
 		if (size > 1)
 			pname1[written - 3] = '\0';
 		GLint loc = glGetUniformLocation(programID, pname1);
 		Uniforms.insert({ pname1, loc });
-		//delete pname1;
+		delete[] pname1;
 	}
+
+	delete[] pname;
 }
 
 void Shader::checkLinkStatus(std::vector<std::string_view> files)
@@ -257,11 +253,4 @@ void Shader::checkLinkStatus(std::vector<std::string_view> files)
 	{
 		// link successful
 	}
-}
-
-
-std::tuple<std::vector<std::string>, std::map<int, std::string>>
-Shader::preprocessShaderSource(std::string_view src, std::string_view filename)
-{
-	return { { std::string(src) }, std::map<int, std::string>() };
 }

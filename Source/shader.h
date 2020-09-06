@@ -162,16 +162,8 @@ private:
 	// shader dir includes source and headers alike
 	static constexpr const char* shader_dir_ = "./resources/Shaders/";
 	static std::string loadFile(std::string path);
-	
-	// Preprocesses a RAW shader source (with #include directives)
-	// returns a vector<string> representing the cumulative shader source, and
-	// a map<int, string>
-	std::tuple<std::vector<std::string>, std::map<int, std::string>>
-		preprocessShaderSource(
-		std::string_view src,
-		std::string_view filename);
 
-	GLint compileShader(shadertype type, const std::vector<std::string>& src, const std::map<int, std::string>& strIDmap);
+	GLint compileShader(shadertype type, const std::vector<std::string>& src);
 	void initUniforms();
 	void checkLinkStatus(std::vector<std::string_view> files);
 }Shader, *ShaderPtr;
