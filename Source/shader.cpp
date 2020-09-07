@@ -57,8 +57,8 @@ Shader::Shader(std::string vertexPath,
 	const std::string vertRawSrc = loadFile(vertexPath);
 	const std::string fragRawSrc = loadFile(fragmentPath);
 
-	bool vertSucc = spvCompileAndLink(vertexPath, shaderc_vertex_shader);
-	bool fragSucc = spvCompileAndLink(fragmentPath, shaderc_fragment_shader);
+	bool vertSucc = spvPreprocessAndCompile(vertexPath, shaderc_vertex_shader);
+	bool fragSucc = spvPreprocessAndCompile(fragmentPath, shaderc_fragment_shader);
 	//auto vres = compiler.PreprocessGlsl(vertRawSrc, shaderc_vertex_shader, vertexPath.c_str(), options);
 	//vres.
 
@@ -260,7 +260,7 @@ void Shader::checkLinkStatus(std::vector<std::string_view> files)
 }
 
 
-bool Shader::spvCompileAndLink(std::string path, shaderc_shader_kind shaderType)
+bool Shader::spvPreprocessAndCompile(std::string path, shaderc_shader_kind shaderType)
 {
 	// vert/frag required
 	const std::string rawSrc = loadFile(path);
