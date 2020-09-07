@@ -3,9 +3,8 @@
 #include <sstream>
 #include <fstream>
 
-#include <shaderc/shaderc.hpp>
-
 int Shader::shader_count_ = 0;
+std::unordered_map<std::string, Shader*> Shader::shaders = std::unordered_map<std::string, Shader*>();
 
 class IncludeHandler : public shaderc::CompileOptions::IncluderInterface
 {
@@ -18,8 +17,10 @@ public:
 	{
 		auto* data = new shaderc_include_result;
 		
-		//data->
+		content = new std::string(Shader::loadFile(requested_source));
+		source_name = new std::string(requested_source);
 
+		
 		return data;
 	}
 
@@ -32,9 +33,10 @@ public:
 	}
 
 private:
+	std::string* content;
+	std::string* source_name;
 };
 
-std::unordered_map<std::string, Shader*> Shader::shaders = std::unordered_map<std::string, Shader*>();
 
 // the provided path does not need to include the shader directory
 Shader::Shader(std::string vertexPath,
@@ -44,11 +46,6 @@ Shader::Shader(std::string vertexPath,
                std::string geometryPath) 
 	: shaderID(shader_count_++)
 {
-	shaderc::Compiler compiler;
-	shaderc::CompileOptions options;
-	options.SetSourceLanguage(shaderc_source_language_glsl);
-	options.SetTargetEnvironment(shaderc_target_env_opengl, 460);
-	//shaderc_compile_options_set_include_callbacks
 
 	vsPath = vertexPath;
 	fsPath = fragmentPath;
@@ -60,6 +57,8 @@ Shader::Shader(std::string vertexPath,
 	const std::string vertRawSrc = loadFile(vertexPath);
 	const std::string fragRawSrc = loadFile(fragmentPath);
 
+	bool vertSucc = spvCompileAndLink(vertexPath, shaderc_vertex_shader);
+	bool fragSucc = spvCompileAndLink(fragmentPath, shaderc_fragment_shader);
 	//auto vres = compiler.PreprocessGlsl(vertRawSrc, shaderc_vertex_shader, vertexPath.c_str(), options);
 	//vres.
 
@@ -108,6 +107,7 @@ Shader::Shader(std::string vertexPath,
 	initUniforms();
 }
 
+
 Shader::Shader(std::string computePath) : shaderID(shader_count_++)
 {
 	csPath = computePath;
@@ -121,6 +121,7 @@ Shader::Shader(std::string computePath) : shaderID(shader_count_++)
 
 	initUniforms();
 }
+
 
 // loads a shader source into a string (string_view doesn't support concatenation)
 std::string Shader::loadFile(std::string path)
@@ -140,6 +141,7 @@ std::string Shader::loadFile(std::string path)
 	}
 	return content;
 }
+
 
 // compiles a shader source and returns its ID
 GLint Shader::compileShader(shadertype type, const std::vector<std::string>& src)
@@ -203,6 +205,7 @@ GLint Shader::compileShader(shadertype type, const std::vector<std::string>& src
 	return shader;
 }
 
+
 // TODO: https://github.com/fendevel/Guide-to-Modern-OpenGL-Functions#ideal-way-of-retrieving-all-uniform-names
 void Shader::initUniforms()
 {
@@ -233,6 +236,7 @@ void Shader::initUniforms()
 	delete[] pname;
 }
 
+
 void Shader::checkLinkStatus(std::vector<std::string_view> files)
 {
 	// link program
@@ -253,4 +257,44 @@ void Shader::checkLinkStatus(std::vector<std::string_view> files)
 	{
 		// link successful
 	}
+}
+
+
+bool Shader::spvCompileAndLink(std::string path, shaderc_shader_kind shaderType)
+{
+	// vert/frag required
+	const std::string rawSrc = loadFile(path);
+
+	shaderc::Compiler compiler;
+	ASSERT(compiler.IsValid());
+
+	shaderc::CompileOptions options;
+	options.SetSourceLanguage(shaderc_source_language_glsl);
+	options.SetTargetEnvironment(shaderc_target_env_opengl, 450);
+	options.SetIncluder(std::make_unique<IncludeHandler>());
+	options.SetAutoMapLocations(true);
+	options.SetAutoBindUniforms(true);
+
+	auto vertPreprocessResult = compiler.PreprocessGlsl(
+		rawSrc, shaderType, path.c_str(), options);
+	if (auto numErr = vertPreprocessResult.GetNumErrors(); numErr > 0)
+	{
+		printf("%llu errors preprocessing %s!\n", numErr, path.c_str());
+		printf("%s", vertPreprocessResult.GetErrorMessage().c_str());
+		return false;
+	}
+
+	//printf("Preprocessed:\n%s\n", vertPreprocessResult.begin());
+
+	auto vertCompileResult = compiler.CompileGlslToSpvAssembly(
+		rawSrc, shaderType, path.c_str(), options);
+	if (auto numErr = vertCompileResult.GetNumErrors(); numErr > 0)
+	{
+		printf("%llu errors compiling %s!\n", numErr, path.c_str());
+		printf("%s", vertCompileResult.GetErrorMessage().c_str());
+		return false;
+	}
+	
+
+	return true;
 }

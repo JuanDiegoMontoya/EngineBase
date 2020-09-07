@@ -3,6 +3,8 @@
 #include "utilities.h"
 #include <map>
 
+#include <shaderc/shaderc.hpp>
+
 // encapsulates shaders by storing uniforms and its GPU memory location
 // also stores the program's name and both shader paths for recompiling
 typedef class Shader
@@ -159,6 +161,8 @@ private:
 
 	static int shader_count_;
 
+	friend class IncludeHandler;
+
 	// shader dir includes source and headers alike
 	static constexpr const char* shader_dir_ = "./resources/Shaders/";
 	static std::string loadFile(std::string path);
@@ -166,4 +170,6 @@ private:
 	GLint compileShader(shadertype type, const std::vector<std::string>& src);
 	void initUniforms();
 	void checkLinkStatus(std::vector<std::string_view> files);
+
+	bool spvCompileAndLink(std::string path, shaderc_shader_kind a);
 }Shader, *ShaderPtr;
