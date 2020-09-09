@@ -3,6 +3,8 @@
 #include <sstream>
 #include <fstream>
 
+static const int LOG_BUF_LEN = 512;
+
 int Shader::shader_count_ = 0;
 std::unordered_map<std::string, Shader*> Shader::shaders = std::unordered_map<std::string, Shader*>();
 
@@ -20,15 +22,22 @@ public:
 		content = new std::string(Shader::loadFile(requested_source));
 		source_name = new std::string(requested_source);
 
-		
+		data->content = content->c_str();
+		data->source_name = source_name->c_str();
+		data->content_length = content->size();
+		data->source_name_length = source_name->size();
+		data->user_data = nullptr;
+
 		return data;
 	}
 
 	virtual void ReleaseInclude(shaderc_include_result* data)
 	{
 		// hopefully this isn't dumb
-		delete[] data->content;
-		delete[] data->source_name;
+		//delete[] data->content;
+		//delete[] data->source_name;
+		delete content;
+		delete source_name;
 		delete data;
 	}
 
@@ -39,28 +48,29 @@ private:
 
 
 // the provided path does not need to include the shader directory
-Shader::Shader(std::string vertexPath,
-               std::string fragmentPath,
-               std::string tessCtrlPath,
-               std::string tessEvalPath,
-               std::string geometryPath) 
+Shader::Shader(
+	std::optional<std::string> vertexPath,
+	std::optional<std::string> fragmentPath,
+	std::optional<std::string> tessCtrlPath = std::nullopt,
+	std::optional<std::string> tessEvalPath = std::nullopt,
+	std::optional<std::string> geometryPath = std::nullopt)
 	: shaderID(shader_count_++)
 {
+	if (!vertexPath || !fragmentPath)
+	{
+		//LOG("insufficient shader parameters");
+		return;
+	}
 
-	vsPath = vertexPath;
-	fsPath = fragmentPath;
-	tcsPath = tessCtrlPath;
-	tesPath = tessEvalPath;
-	gsPath = geometryPath;
+	vsPath = vertexPath.value();
+	fsPath = fragmentPath.value();
+	tcsPath = tessCtrlPath.value();
+	tesPath = tessEvalPath.value();
+	gsPath = geometryPath.value();
 
 	// vert/frag required
-	const std::string vertRawSrc = loadFile(vertexPath);
-	const std::string fragRawSrc = loadFile(fragmentPath);
-
-	bool vertSucc = spvPreprocessAndCompile(vertexPath, shaderc_vertex_shader);
-	bool fragSucc = spvPreprocessAndCompile(fragmentPath, shaderc_fragment_shader);
-	//auto vres = compiler.PreprocessGlsl(vertRawSrc, shaderc_vertex_shader, vertexPath.c_str(), options);
-	//vres.
+	const std::string vertRawSrc = loadFile(vertexPath.value());
+	const std::string fragRawSrc = loadFile(fragmentPath.value());
 
 	// compile individual shaders
 	programID = glCreateProgram();
@@ -93,7 +103,7 @@ Shader::Shader(std::string vertexPath,
 	glAttachShader(programID, fShader);
 	glLinkProgram(programID);
 
-	checkLinkStatus({ vertexPath, fragmentPath });
+	checkLinkStatus({ *vertexPath, *fragmentPath });
 
 	glDeleteShader(vShader);
 	glDeleteShader(fShader);
@@ -123,6 +133,90 @@ Shader::Shader(std::string computePath) : shaderID(shader_count_++)
 }
 
 
+Shader::Shader(std::vector<std::pair<std::string, GLint>> shaders) : shaderID(shader_count_++)
+{
+#if DE_BUG
+	std::unordered_map<int, int> types;
+	for (const auto& [u, type] : shaders)
+	{
+		ASSERT_MSG(++types[type] > 1,
+			"FATAL: Multiple shaders of one type is illegal!");
+	}
+	ASSERT_MSG(types[TY_VERTEX] +
+		types[TY_FRAGMENT] +
+		types[TY_TESS_CONTROL] +
+		types[TY_TESS_EVAL] +
+		types[TY_GEOMETRY] == shaders.size(),
+		"FATAL: Invalid shader types specified!");
+	ASSERT_MSG(types[TY_COMPUTE] == 0 ? true : shaders.size() == 1,
+		"FATAL: Multiple compute shaders or compute shader mix with other types!");
+#endif
+
+	const std::unordered_map<glShaderType, shaderc_shader_kind> gl2shadercTypes =
+	{
+		{ GL_VERTEX_SHADER, shaderc_vertex_shader },
+		{ GL_FRAGMENT_SHADER, shaderc_fragment_shader },
+		{ GL_TESS_CONTROL_SHADER, shaderc_tess_control_shader },
+		{ GL_TESS_EVALUATION_SHADER, shaderc_tess_evaluation_shader },
+		{ GL_GEOMETRY_SHADER, shaderc_geometry_shader },
+		{ GL_COMPUTE_SHADER, shaderc_compute_shader }
+	};
+
+	shaderc::Compiler compiler;
+	ASSERT(compiler.IsValid());
+
+	shaderc::CompileOptions options;
+	options.SetSourceLanguage(shaderc_source_language_glsl);
+	options.SetTargetEnvironment(shaderc_target_env_opengl, 450);
+	options.SetIncluder(std::make_unique<IncludeHandler>());
+	options.SetAutoMapLocations(true);
+	options.SetAutoBindUniforms(true);
+	
+	//auto vertRes = spvPreprocessAndCompile(compiler, options, vertexPath.value(), shaderc_vertex_shader);
+	//auto fragRes = spvPreprocessAndCompile(compiler, options, fragmentPath.value(), shaderc_fragment_shader);
+	//if (!vertRes || !fragRes)
+	//	return;
+
+	std::vector<GLuint> shaderIDs;
+
+	for (auto& [shaderPath, shaderType] : shaders)
+	{
+		// preprocess shader
+		auto compileResult = spvPreprocessAndCompile(compiler, options, shaderPath, gl2shadercTypes.at(shaderType));
+
+		if (!compileResult)
+			return;
+
+		// "compile" (upload binary) shader
+		GLuint shaderID = glCreateShader(GL_VERTEX_SHADER);
+		shaderIDs.push_back(shaderID);
+		const GLsizei bufsize = compileResult->end() - compileResult->begin();
+		glShaderBinary(1, &shaderID, GL_SHADER_BINARY_FORMATS, compileResult->begin(), bufsize);
+		glSpecializeShader(shaderID, "main", 0, 0, 0);
+
+		// check if shader compilation succeeded
+		GLint compileStatus = 0;
+		glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &compileStatus);
+		if (compileStatus == GL_FALSE)
+		{
+			GLint maxlen = 0;
+			GLchar infoLog[LOG_BUF_LEN];
+			glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &maxlen);
+			glGetShaderInfoLog(vertexShader, LOG_BUF_LEN, NULL, infoLog);
+
+			std::cout << "File: " << vertexPath->c_str() << std::endl;
+			std::cout << "Error binary-ing shader of type " << GL_VERTEX_SHADER << '\n' << infoLog << std::endl;
+		}
+	}
+
+	programID = glCreateProgram();
+
+	// for each shader
+	for (auto& [])
+		glAttachShader(programID, vertexShader);
+}
+
+
 // loads a shader source into a string (string_view doesn't support concatenation)
 std::string Shader::loadFile(std::string path)
 {
@@ -136,7 +230,7 @@ std::string Shader::loadFile(std::string path)
 	}
 	catch (std::ifstream::failure e)
 	{
-		std::cout << "Error reading shader: " << path << '\n';
+		std::cout << "Error reading shader file: " << path << '\n';
 		std::cout << "Message: " << e.what() << std::endl;
 	}
 	return content;
@@ -260,41 +354,37 @@ void Shader::checkLinkStatus(std::vector<std::string_view> files)
 }
 
 
-bool Shader::spvPreprocessAndCompile(std::string path, shaderc_shader_kind shaderType)
+
+std::optional<shaderc::AssemblyCompilationResult>
+	Shader::spvPreprocessAndCompile(
+		shaderc::Compiler& compiler,
+		const shaderc::CompileOptions options,
+		std::string path,
+		shaderc_shader_kind shaderType)
 {
 	// vert/frag required
 	const std::string rawSrc = loadFile(path);
 
-	shaderc::Compiler compiler;
-	ASSERT(compiler.IsValid());
-
-	shaderc::CompileOptions options;
-	options.SetSourceLanguage(shaderc_source_language_glsl);
-	options.SetTargetEnvironment(shaderc_target_env_opengl, 450);
-	options.SetIncluder(std::make_unique<IncludeHandler>());
-	options.SetAutoMapLocations(true);
-	options.SetAutoBindUniforms(true);
-
-	auto vertPreprocessResult = compiler.PreprocessGlsl(
+	auto PreprocessResult = compiler.PreprocessGlsl(
 		rawSrc, shaderType, path.c_str(), options);
-	if (auto numErr = vertPreprocessResult.GetNumErrors(); numErr > 0)
+	if (auto numErr = PreprocessResult.GetNumErrors(); numErr > 0)
 	{
+		PreprocessResult.GetCompilationStatus();
 		printf("%llu errors preprocessing %s!\n", numErr, path.c_str());
-		printf("%s", vertPreprocessResult.GetErrorMessage().c_str());
-		return false;
+		printf("%s", PreprocessResult.GetErrorMessage().c_str());
+		return std::nullopt;
 	}
 
-	//printf("Preprocessed:\n%s\n", vertPreprocessResult.begin());
+	//printf("Preprocessed:\n%s\n", PreprocessResult.begin());
 
-	auto vertCompileResult = compiler.CompileGlslToSpvAssembly(
-		rawSrc, shaderType, path.c_str(), options);
-	if (auto numErr = vertCompileResult.GetNumErrors(); numErr > 0)
+	auto CompileResult = compiler.CompileGlslToSpvAssembly(
+		PreprocessResult.begin(), shaderType, path.c_str(), options);
+	if (auto numErr = CompileResult.GetNumErrors(); numErr > 0)
 	{
 		printf("%llu errors compiling %s!\n", numErr, path.c_str());
-		printf("%s", vertCompileResult.GetErrorMessage().c_str());
-		return false;
+		printf("%s", CompileResult.GetErrorMessage().c_str());
+		return std::nullopt;
 	}
 	
-
-	return true;
+	return CompileResult;
 }

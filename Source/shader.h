@@ -10,6 +10,8 @@
 typedef class Shader
 {
 public:
+	using glShaderType = GLint;
+
 	GLuint programID;		// the program's address in GPU memory
 	const int shaderID;	// index into shader array
 	std::string name;		// probably actual index into shader array
@@ -22,14 +24,19 @@ public:
 	std::string fsPath;	// fragment shader path
 	std::string csPath;	// compute shader path
 
-	// standard vertex + fragment program constructor
+	// standard constructor
 	Shader(
-		std::string vertexPath,
-		std::string fragmentPath,
-		std::string tessCtrlPath = "<null>",
-		std::string tessEvalPath = "<null>",
-		std::string geometryPath = "<null>");
+		std::optional<std::string> vertexPath,
+		std::optional<std::string> fragmentPath,
+		std::optional<std::string> tessCtrlPath = std::nullopt,
+		std::optional<std::string> tessEvalPath = std::nullopt,
+		std::optional<std::string> geometryPath = std::nullopt);
+
+	// compute shader constructor
 	Shader(std::string computePath);
+
+	// universal SPIR-V constructor (takes a list of paths and shader types)
+	Shader(std::vector<std::pair<std::string, glShaderType>> shaders);
 
 	// default constructor (currently no uses)
 	Shader() : shaderID(shader_count_)
@@ -156,7 +163,7 @@ private:
 		TY_TESS_EVAL = GL_TESS_EVALUATION_SHADER,
 		TY_GEOMETRY = GL_GEOMETRY_SHADER,
 		TY_FRAGMENT = GL_FRAGMENT_SHADER,
-		TY_COMPUTE = GL_COMPUTE_SHADER
+		TY_COMPUTE = GL_COMPUTE_SHADER,
 	};
 
 	static int shader_count_;
@@ -171,5 +178,10 @@ private:
 	void initUniforms();
 	void checkLinkStatus(std::vector<std::string_view> files);
 
-	bool spvCompileAndLink(std::string path, shaderc_shader_kind a);
+	std::optional<shaderc::AssemblyCompilationResult>
+		spvPreprocessAndCompile(
+			shaderc::Compiler& compiler,
+			const shaderc::CompileOptions options,
+			std::string path,
+			shaderc_shader_kind a);
 }Shader, *ShaderPtr;
