@@ -51,9 +51,9 @@ private:
 Shader::Shader(
 	std::optional<std::string> vertexPath,
 	std::optional<std::string> fragmentPath,
-	std::optional<std::string> tessCtrlPath = std::nullopt,
-	std::optional<std::string> tessEvalPath = std::nullopt,
-	std::optional<std::string> geometryPath = std::nullopt)
+	std::optional<std::string> tessCtrlPath,
+	std::optional<std::string> tessEvalPath,
+	std::optional<std::string> geometryPath)
 	: shaderID(shader_count_++)
 {
 	if (!vertexPath || !fragmentPath)
@@ -64,9 +64,12 @@ Shader::Shader(
 
 	vsPath = vertexPath.value();
 	fsPath = fragmentPath.value();
-	tcsPath = tessCtrlPath.value();
-	tesPath = tessEvalPath.value();
-	gsPath = geometryPath.value();
+	if (tessCtrlPath)
+		tcsPath = tessCtrlPath.value();
+	if (tessEvalPath)
+		tesPath = tessEvalPath.value();
+	if (geometryPath)
+		gsPath = geometryPath.value();
 
 	// vert/frag required
 	const std::string vertRawSrc = loadFile(vertexPath.value());
@@ -139,7 +142,7 @@ Shader::Shader(std::vector<std::pair<std::string, GLint>> shaders) : shaderID(sh
 	std::unordered_map<int, int> types;
 	for (const auto& [u, type] : shaders)
 	{
-		ASSERT_MSG(++types[type] > 1,
+		ASSERT_MSG(++types[type] == 1,
 			"FATAL: Multiple shaders of one type is illegal!");
 	}
 	ASSERT_MSG(types[TY_VERTEX] +
@@ -184,36 +187,54 @@ Shader::Shader(std::vector<std::pair<std::string, GLint>> shaders) : shaderID(sh
 		// preprocess shader
 		auto compileResult = spvPreprocessAndCompile(compiler, options, shaderPath, gl2shadercTypes.at(shaderType));
 
+		// cleanup existing shaders
 		if (!compileResult)
-			return;
+		{
+			for (auto ID : shaderIDs)
+				glDeleteShader(ID);
+		}
 
 		// "compile" (upload binary) shader
 		GLuint shaderID = glCreateShader(GL_VERTEX_SHADER);
 		shaderIDs.push_back(shaderID);
 		const GLsizei bufsize = compileResult->end() - compileResult->begin();
-		glShaderBinary(1, &shaderID, GL_SHADER_BINARY_FORMATS, compileResult->begin(), bufsize);
-		glSpecializeShader(shaderID, "main", 0, 0, 0);
+		glShaderBinary(1, &shaderID, GL_SHADER_BINARY_FORMAT_SPIR_V, compileResult->begin(), bufsize);
+		const GLchar* main = "main";
+		glSpecializeShader(shaderID, main, 0, 0, 0);
 
 		// check if shader compilation succeeded
 		GLint compileStatus = 0;
-		glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &compileStatus);
+		glGetShaderiv(shaderID, GL_COMPILE_STATUS, &compileStatus);
 		if (compileStatus == GL_FALSE)
 		{
 			GLint maxlen = 0;
 			GLchar infoLog[LOG_BUF_LEN];
-			glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &maxlen);
-			glGetShaderInfoLog(vertexShader, LOG_BUF_LEN, NULL, infoLog);
+			glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &maxlen);
+			glGetShaderInfoLog(shaderID, LOG_BUF_LEN, NULL, infoLog);
 
-			std::cout << "File: " << vertexPath->c_str() << std::endl;
+			std::cout << "File: " << shaderPath.c_str() << std::endl;
 			std::cout << "Error binary-ing shader of type " << GL_VERTEX_SHADER << '\n' << infoLog << std::endl;
 		}
 	}
 
 	programID = glCreateProgram();
 
-	// for each shader
-	for (auto& [])
-		glAttachShader(programID, vertexShader);
+	for (auto ID : shaderIDs)
+		glAttachShader(programID, ID);
+
+	glLinkProgram(programID);
+
+	GLint success;
+	GLchar infoLog[512];
+	glGetProgramiv(programID, GL_LINK_STATUS, &success);
+	if (!success)
+	{
+		glGetProgramInfoLog(programID, 512, NULL, infoLog);
+		printf("Failed to link shader program.\nFiles:\n");
+		for (auto [path, type] : shaders)
+			std::printf("%s\n", path.c_str());
+		std::cout << "Failed to link shader program\n" << infoLog << std::endl;
+	}
 }
 
 
@@ -355,7 +376,7 @@ void Shader::checkLinkStatus(std::vector<std::string_view> files)
 
 
 
-std::optional<shaderc::AssemblyCompilationResult>
+std::optional<shaderc::SpvCompilationResult>
 	Shader::spvPreprocessAndCompile(
 		shaderc::Compiler& compiler,
 		const shaderc::CompileOptions options,
@@ -377,7 +398,7 @@ std::optional<shaderc::AssemblyCompilationResult>
 
 	//printf("Preprocessed:\n%s\n", PreprocessResult.begin());
 
-	auto CompileResult = compiler.CompileGlslToSpvAssembly(
+	auto CompileResult = compiler.CompileGlslToSpv(
 		PreprocessResult.begin(), shaderType, path.c_str(), options);
 	if (auto numErr = CompileResult.GetNumErrors(); numErr > 0)
 	{
@@ -386,5 +407,8 @@ std::optional<shaderc::AssemblyCompilationResult>
 		return std::nullopt;
 	}
 	
+	std::cout << PreprocessResult.GetCompilationStatus() << std::endl;
+	std::cout << CompileResult.GetCompilationStatus() << std::endl;
+
 	return CompileResult;
 }
