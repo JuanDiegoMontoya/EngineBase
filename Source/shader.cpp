@@ -122,19 +122,19 @@ Shader::Shader(
 }
 
 
-Shader::Shader(std::string computePath) : shaderID(shader_count_++)
-{
-	csPath = computePath;
-	programID = glCreateProgram();
-	const std::string compRawSrc = loadFile(computePath);
-	GLint cShader = compileShader(TY_COMPUTE, { compRawSrc });
-	glAttachShader(programID, cShader);
-	glLinkProgram(programID);
-	checkLinkStatus({ computePath });
-	glDeleteShader(cShader);
-
-	initUniforms();
-}
+//Shader::Shader(std::string computePath) : shaderID(shader_count_++)
+//{
+//	csPath = computePath;
+//	programID = glCreateProgram();
+//	const std::string compRawSrc = loadFile(computePath);
+//	GLint cShader = compileShader(TY_COMPUTE, { compRawSrc });
+//	glAttachShader(programID, cShader);
+//	glLinkProgram(programID);
+//	checkLinkStatus({ computePath });
+//	glDeleteShader(cShader);
+//
+//	initUniforms();
+//}
 
 
 Shader::Shader(std::vector<std::pair<std::string, GLint>> shaders) : shaderID(shader_count_++)
@@ -146,14 +146,21 @@ Shader::Shader(std::vector<std::pair<std::string, GLint>> shaders) : shaderID(sh
 		ASSERT_MSG(++types[type] == 1,
 			"FATAL: Multiple shaders of one type is illegal!");
 	}
-	ASSERT_MSG(types[TY_VERTEX] +
-		types[TY_FRAGMENT] +
-		types[TY_TESS_CONTROL] +
-		types[TY_TESS_EVAL] +
-		types[TY_GEOMETRY] == shaders.size(),
-		"FATAL: Invalid shader types specified!");
-	ASSERT_MSG(types[TY_COMPUTE] == 0 ? true : shaders.size() == 1,
-		"FATAL: Multiple compute shaders or compute shader mix with other types!");
+
+	if (types[TY_COMPUTE] == 0)
+	{
+		ASSERT_MSG(types[TY_VERTEX] +
+			types[TY_FRAGMENT] +
+			types[TY_TESS_CONTROL] +
+			types[TY_TESS_EVAL] +
+			types[TY_GEOMETRY] == shaders.size(),
+			"FATAL: Invalid shader types specified!");
+	}
+	else
+	{
+		ASSERT_MSG(shaders.size() == 1,
+			"FATAL: Multiple compute shaders or compute shader mix with other types!");
+	}
 #endif
 
 	const std::unordered_map<glShaderType, shaderc_shader_kind> gl2shadercTypes =
@@ -199,7 +206,7 @@ Shader::Shader(std::vector<std::pair<std::string, GLint>> shaders) : shaderID(sh
 		// "compile" (upload binary) shader
 		GLuint shaderID = glCreateShader(shaderType);
 		shaderIDs.push_back(shaderID);
-		glShaderBinary(1, &shaderID, GL_SHADER_BINARY_FORMAT_SPIR_V, compileResult.data(), compileResult.size());
+		glShaderBinary(1, &shaderID, GL_SHADER_BINARY_FORMAT_SPIR_V, compileResult.data(), compileResult.size() * sizeof(uint32_t));
 		glSpecializeShader(shaderID, "main", 0, 0, 0);
 
 		// check if shader compilation succeeded
@@ -420,16 +427,21 @@ std::vector<uint32_t>
 	// all this is debug
 	//std::cout << PreprocessResult.GetCompilationStatus() << std::endl;
 	//std::cout << CompileResult.GetCompilationStatus() << std::endl;
+#if 0
 	{
-		auto asmResult = compiler.CompileGlslToSpvAssembly(
-			PreprocessResult.begin(), shaderType, path.c_str(), options); 
-		std::vector<int> v{ asmResult.begin(), asmResult.end() };
-		std::ofstream outfile("./resources/BinaryOutput/" + path + ".spv", std::ios::out | std::ofstream::binary);
-
-		std::copy(v.begin(), v.end(), std::ostream_iterator<int>(outfile));
-		outfile.close();
+		auto asmResult = compiler.CompileGlslToSpv(
+			PreprocessResult.begin(), shaderType, path.c_str(), options);
+		ASSERT(asmResult.GetNumErrors() == 0);
+		std::vector<uint32_t> v{ asmResult.begin(), asmResult.end() };
+		std::ofstream outfile("./resources/BinaryOutput/" + path + ".spv", std::ios::out | std::ios::trunc | std::ofstream::binary);
+		for (auto val : v)
+		{
+			outfile.write(reinterpret_cast<const char*>(&val), sizeof(uint32_t));
+			if (outfile.bad())
+				throw std::runtime_error("Failed to write to outfile!");
+		}
 	}
-
+#endif
 
 	return { CompileResult.begin(), CompileResult.end() };
 }

@@ -33,7 +33,7 @@ public:
 		std::optional<std::string> geometryPath = std::nullopt);
 
 	// compute shader constructor
-	Shader(std::string computePath);
+	//Shader(std::string computePath);
 
 	// universal SPIR-V constructor (takes a list of paths and shader types)
 	Shader(std::vector<std::pair<std::string, glShaderType>> shaders);
@@ -178,6 +178,7 @@ private:
 	void initUniforms();
 	void checkLinkStatus(std::vector<std::string_view> files);
 
+	// returns compiled SPIR-V
 	std::vector<uint32_t>
 		spvPreprocessAndCompile(
 			shaderc::Compiler& compiler,
