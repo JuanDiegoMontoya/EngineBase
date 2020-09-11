@@ -178,7 +178,7 @@ private:
 	void initUniforms();
 	void checkLinkStatus(std::vector<std::string_view> files);
 
-	std::optional<shaderc::SpvCompilationResult>
+	std::vector<uint32_t>
 		spvPreprocessAndCompile(
 			shaderc::Compiler& compiler,
 			const shaderc::CompileOptions options,

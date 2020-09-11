@@ -3,6 +3,7 @@
 #include <sstream>
 #include <fstream>
 
+
 static const int LOG_BUF_LEN = 512;
 
 int Shader::shader_count_ = 0;
@@ -188,19 +189,18 @@ Shader::Shader(std::vector<std::pair<std::string, GLint>> shaders) : shaderID(sh
 		auto compileResult = spvPreprocessAndCompile(compiler, options, shaderPath, gl2shadercTypes.at(shaderType));
 
 		// cleanup existing shaders
-		if (!compileResult)
+		if (compileResult.size() == 0)
 		{
 			for (auto ID : shaderIDs)
 				glDeleteShader(ID);
+			break;
 		}
 
 		// "compile" (upload binary) shader
-		GLuint shaderID = glCreateShader(GL_VERTEX_SHADER);
+		GLuint shaderID = glCreateShader(shaderType);
 		shaderIDs.push_back(shaderID);
-		const GLsizei bufsize = compileResult->end() - compileResult->begin();
-		glShaderBinary(1, &shaderID, GL_SHADER_BINARY_FORMAT_SPIR_V, compileResult->begin(), bufsize);
-		const GLchar* main = "main";
-		glSpecializeShader(shaderID, main, 0, 0, 0);
+		glShaderBinary(1, &shaderID, GL_SHADER_BINARY_FORMAT_SPIR_V, compileResult.data(), compileResult.size());
+		glSpecializeShader(shaderID, "main", 0, 0, 0);
 
 		// check if shader compilation succeeded
 		GLint compileStatus = 0;
@@ -212,8 +212,8 @@ Shader::Shader(std::vector<std::pair<std::string, GLint>> shaders) : shaderID(sh
 			glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &maxlen);
 			glGetShaderInfoLog(shaderID, LOG_BUF_LEN, NULL, infoLog);
 
-			std::cout << "File: " << shaderPath.c_str() << std::endl;
-			std::cout << "Error binary-ing shader of type " << GL_VERTEX_SHADER << '\n' << infoLog << std::endl;
+			printf("File: %s\n", shaderPath.c_str());
+			printf("Error binary-ing shader of type %d\n%s\n", shaderType, infoLog);
 		}
 	}
 
@@ -235,6 +235,16 @@ Shader::Shader(std::vector<std::pair<std::string, GLint>> shaders) : shaderID(sh
 			std::printf("%s\n", path.c_str());
 		std::cout << "Failed to link shader program\n" << infoLog << std::endl;
 	}
+
+	std::vector<std::string_view> strs;
+	for (const auto& [shaderPath, shaderType] : shaders)
+		strs.push_back(shaderPath);
+	checkLinkStatus(strs);
+
+	initUniforms();
+
+	for (auto shaderID : shaderIDs)
+		glDetachShader(programID, shaderID);
 }
 
 
@@ -376,7 +386,7 @@ void Shader::checkLinkStatus(std::vector<std::string_view> files)
 
 
 
-std::optional<shaderc::SpvCompilationResult>
+std::vector<uint32_t>
 	Shader::spvPreprocessAndCompile(
 		shaderc::Compiler& compiler,
 		const shaderc::CompileOptions options,
@@ -393,7 +403,7 @@ std::optional<shaderc::SpvCompilationResult>
 		PreprocessResult.GetCompilationStatus();
 		printf("%llu errors preprocessing %s!\n", numErr, path.c_str());
 		printf("%s", PreprocessResult.GetErrorMessage().c_str());
-		return std::nullopt;
+		return {};
 	}
 
 	//printf("Preprocessed:\n%s\n", PreprocessResult.begin());
@@ -404,11 +414,22 @@ std::optional<shaderc::SpvCompilationResult>
 	{
 		printf("%llu errors compiling %s!\n", numErr, path.c_str());
 		printf("%s", CompileResult.GetErrorMessage().c_str());
-		return std::nullopt;
+		return {};
 	}
-	
-	std::cout << PreprocessResult.GetCompilationStatus() << std::endl;
-	std::cout << CompileResult.GetCompilationStatus() << std::endl;
 
-	return CompileResult;
+	// all this is debug
+	//std::cout << PreprocessResult.GetCompilationStatus() << std::endl;
+	//std::cout << CompileResult.GetCompilationStatus() << std::endl;
+	{
+		auto asmResult = compiler.CompileGlslToSpvAssembly(
+			PreprocessResult.begin(), shaderType, path.c_str(), options); 
+		std::vector<int> v{ asmResult.begin(), asmResult.end() };
+		std::ofstream outfile("./resources/BinaryOutput/" + path + ".spv", std::ios::out | std::ofstream::binary);
+
+		std::copy(v.begin(), v.end(), std::ostream_iterator<int>(outfile));
+		outfile.close();
+	}
+
+
+	return { CompileResult.begin(), CompileResult.end() };
 }
