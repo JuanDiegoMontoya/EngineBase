@@ -122,19 +122,19 @@ Shader::Shader(
 }
 
 
-//Shader::Shader(std::string computePath) : shaderID(shader_count_++)
-//{
-//	csPath = computePath;
-//	programID = glCreateProgram();
-//	const std::string compRawSrc = loadFile(computePath);
-//	GLint cShader = compileShader(TY_COMPUTE, { compRawSrc });
-//	glAttachShader(programID, cShader);
-//	glLinkProgram(programID);
-//	checkLinkStatus({ computePath });
-//	glDeleteShader(cShader);
-//
-//	initUniforms();
-//}
+Shader::Shader(int, std::string computePath) : shaderID(shader_count_++)
+{
+	csPath = computePath;
+	programID = glCreateProgram();
+	const std::string compRawSrc = loadFile(computePath);
+	GLint cShader = compileShader(TY_COMPUTE, { compRawSrc });
+	glAttachShader(programID, cShader);
+	glLinkProgram(programID);
+	checkLinkStatus({ computePath });
+	glDeleteShader(cShader);
+
+	initUniforms();
+}
 
 
 Shader::Shader(std::vector<std::pair<std::string, GLint>> shaders) : shaderID(shader_count_++)
@@ -182,7 +182,6 @@ Shader::Shader(std::vector<std::pair<std::string, GLint>> shaders) : shaderID(sh
 	options.SetIncluder(std::make_unique<IncludeHandler>());
 	options.SetAutoMapLocations(true);
 	options.SetAutoBindUniforms(true);
-	
 	//auto vertRes = spvPreprocessAndCompile(compiler, options, vertexPath.value(), shaderc_vertex_shader);
 	//auto fragRes = spvPreprocessAndCompile(compiler, options, fragmentPath.value(), shaderc_fragment_shader);
 	//if (!vertRes || !fragRes)

@@ -33,7 +33,7 @@ public:
 		std::optional<std::string> geometryPath = std::nullopt);
 
 	// compute shader constructor
-	//Shader(std::string computePath);
+	Shader(int, std::string computePath);
 
 	// universal SPIR-V constructor (takes a list of paths and shader types)
 	Shader(std::vector<std::pair<std::string, glShaderType>> shaders);
