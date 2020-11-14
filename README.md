@@ -1,4 +1,5 @@
 # EngineBase
+(Note: this is just files ripped out from a previous project and jammed into its own repo. It is not meant to be good, but rather shared among my projects.)  
 Include in Git projects as a submodule.
 
 ## Features
